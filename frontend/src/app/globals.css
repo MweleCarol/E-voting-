@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Primary — deep civic navy */
+  --color-primary: #1B2E4B;
+  --color-primary-light: #2A4570;
+  --color-primary-muted: #E8EDF5;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Accent — election green (trust, go, verified) */
+  --color-accent: #1A7F5A;
+  --color-accent-light: #D1F0E4;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  /* Warning — amber for pending/approval states */
+  --color-warning: #B45309;
+  --color-warning-light: #FEF3C7;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Danger — for irreversible/destructive actions */
+  --color-danger: #B91C1C;
+  --color-danger-light: #FEE2E2;
+
+  /* Neutral scale */
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #F8FAFC;
+  --color-border: #E2E8F0;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+
+
+--font-display: 'DM Sans', sans-serif;
+--font-body: 'Inter', sans-serif;
+--font-mono: 'JetBrains Mono', monospace;
 }

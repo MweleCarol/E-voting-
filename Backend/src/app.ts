@@ -2,7 +2,7 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { config } from '@config/index';
+import { config } from '@config/index.js';
 import { logger } from '@config/logger';
 
 const app: Application = express();

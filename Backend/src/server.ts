@@ -1,5 +1,5 @@
 import app from './app';
-import { config } from '@config/index';
+import { config } from '@config/index.js';
 import { logger } from '@config/logger';
 
 const startServer = async (): Promise<void> => {

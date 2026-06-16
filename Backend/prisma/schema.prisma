@@ -5,7 +5,7 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -177,11 +177,14 @@ model Ballot {
 // ─── VOTES ────────────────────────────────────────────────────────────────────
 // No student reference here — ever. ballotToken is the only link, and it is one-way.
 model Vote {
-  id            String   @id @default(uuid())
-  ballotToken   String   @map("ballot_token")
-  encryptedVote String   @map("encrypted_vote")
-  signature     String
-  createdAt     DateTime @default(now()) @map("created_at")
+  id               String   @id @default(uuid())
+  ballotToken      String   @map("ballot_token")
+  encryptedVote    String   @map("encrypted_vote")
+  iv               String
+  authTag          String   @map("auth_tag")
+  algorithmVersion String   @default("AES-256-GCM-v1") @map("algorithm_version")
+  signature        String
+  createdAt        DateTime @default(now()) @map("created_at")
 
   receipt VoteReceipt?
 
@@ -190,9 +193,10 @@ model Vote {
 
 // ─── VOTE RECEIPTS ────────────────────────────────────────────────────────────
 model VoteReceipt {
-  id          String @id @default(uuid())
-  voteId      String @unique @map("vote_id")
-  receiptCode String @unique @map("receipt_code")
+  id          String   @id @default(uuid())
+  voteId      String   @unique @map("vote_id")
+  receiptCode String   @unique @map("receipt_code")
+  createdAt   DateTime @default(now()) @map("created_at")
 
   vote Vote @relation(fields: [voteId], references: [id])
 
