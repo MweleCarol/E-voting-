@@ -1,0 +1,302 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+
+// ─── ROLES ────────────────────────────────────────────────────────────────────
+model Role {
+  id    String @id @default(uuid())
+  name  String @unique
+
+  users User[]
+
+  @@map("roles")
+}
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  status       UserStatus @default(ACTIVE)
+  roleId       String   @map("role_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  role                Role              @relation(fields: [roleId], references: [id])
+  student             Student?
+  createdElections    Election[]        @relation("ElectionCreatedBy")
+  verifiedVoters      VoterRegistration[] @relation("VerifiedBy")
+  approvalRequests    ApprovalRequest[] @relation("RequestedBy")
+  approvals           Approval[]        @relation("OfficerApprovals")
+  totpSecret          TotpSecret?
+  refreshTokens       RefreshToken[]
+
+  @@map("users")
+}
+
+// ─── TOTP SECRET ──────────────────────────────────────────────────────────────
+// Stored separately so it is never accidentally included in user queries
+model TotpSecret {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  secret    String
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("totp_secrets")
+}
+
+// ─── REFRESH TOKENS ───────────────────────────────────────────────────────────
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// ─── STUDENTS ─────────────────────────────────────────────────────────────────
+model Student {
+  id          String @id @default(uuid())
+  userId      String @unique @map("user_id")
+  admissionNo String @unique @map("admission_no")
+  fullName    String @map("full_name")
+  school      String
+  yearOfStudy Int    @map("year_of_study")
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registrations VoterRegistration[]
+  candidacies   Candidate[]
+
+  @@map("students")
+}
+
+// ─── VOTER REGISTRATION ───────────────────────────────────────────────────────
+model VoterRegistration {
+  id           String    @id @default(uuid())
+  studentId    String    @map("student_id")
+  electionId   String    @map("election_id")
+  verified     Boolean   @default(false)
+  verifiedBy   String?   @map("verified_by")
+  verifiedAt   DateTime? @map("verified_at")
+  participated Boolean   @default(false)
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  student    Student   @relation(fields: [studentId], references: [id])
+  election   Election  @relation(fields: [electionId], references: [id])
+  verifier   User?     @relation("VerifiedBy", fields: [verifiedBy], references: [id])
+
+  @@unique([studentId, electionId])
+  @@map("voter_registrations")
+}
+
+// ─── ELECTIONS ────────────────────────────────────────────────────────────────
+model Election {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  status      ElectionStatus @default(DRAFT)
+  startDate   DateTime       @map("start_date")
+  endDate     DateTime       @map("end_date")
+  createdBy   String         @map("created_by")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  creator           User                @relation("ElectionCreatedBy", fields: [createdBy], references: [id])
+  positions         ElectionPosition[]
+  voterRegistrations VoterRegistration[]
+  ballots           Ballot[]
+  approvalRequests  ApprovalRequest[]
+
+  @@map("elections")
+}
+
+// ─── ELECTION POSITIONS ───────────────────────────────────────────────────────
+model ElectionPosition {
+  id         String @id @default(uuid())
+  electionId String @map("election_id")
+  title      String
+
+  election   Election    @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  candidates Candidate[]
+
+  @@map("election_positions")
+}
+
+// ─── CANDIDATES ───────────────────────────────────────────────────────────────
+model Candidate {
+  id         String          @id @default(uuid())
+  studentId  String          @map("student_id")
+  positionId String          @map("position_id")
+  manifesto  String?
+  status     CandidateStatus @default(PENDING)
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  student  Student          @relation(fields: [studentId], references: [id])
+  position ElectionPosition @relation(fields: [positionId], references: [id])
+
+  @@unique([studentId, positionId])
+  @@map("candidates")
+}
+
+// ─── BALLOTS ──────────────────────────────────────────────────────────────────
+// A ballot is an anonymous token. It has no student_id — that is intentional.
+model Ballot {
+  id         String   @id @default(uuid())
+  electionId String   @map("election_id")
+  token      String   @unique @default(uuid())
+  issuedAt   DateTime @default(now()) @map("issued_at")
+  expiresAt  DateTime @map("expires_at")
+  used       Boolean  @default(false)
+
+  election Election @relation(fields: [electionId], references: [id])
+
+  @@map("ballots")
+}
+
+// ─── VOTES ────────────────────────────────────────────────────────────────────
+// No student reference here — ever. ballotToken is the only link, and it is one-way.
+model Vote {
+  id            String   @id @default(uuid())
+  ballotToken   String   @map("ballot_token")
+  encryptedVote String   @map("encrypted_vote")
+  signature     String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  receipt VoteReceipt?
+
+  @@map("votes")
+}
+
+// ─── VOTE RECEIPTS ────────────────────────────────────────────────────────────
+model VoteReceipt {
+  id          String @id @default(uuid())
+  voteId      String @unique @map("vote_id")
+  receiptCode String @unique @map("receipt_code")
+
+  vote Vote @relation(fields: [voteId], references: [id])
+
+  @@map("vote_receipts")
+}
+
+// ─── APPROVAL REQUESTS ────────────────────────────────────────────────────────
+model ApprovalRequest {
+  id          String               @id @default(uuid())
+  actionType  ApprovalActionType   @map("action_type")
+  requestedBy String               @map("requested_by")
+  electionId  String?              @map("election_id")
+  status      ApprovalStatus       @default(PENDING)
+  payload     Json?
+  createdAt   DateTime             @default(now()) @map("created_at")
+  resolvedAt  DateTime?            @map("resolved_at")
+
+  requester User              @relation("RequestedBy", fields: [requestedBy], references: [id])
+  election  Election?         @relation(fields: [electionId], references: [id])
+  approvals Approval[]
+
+  @@map("approval_requests")
+}
+
+// ─── APPROVALS ────────────────────────────────────────────────────────────────
+model Approval {
+  id        String           @id @default(uuid())
+  requestId String           @map("request_id")
+  officerId String           @map("officer_id")
+  decision  ApprovalDecision
+  comment   String?
+  timestamp DateTime         @default(now())
+
+  request ApprovalRequest @relation(fields: [requestId], references: [id])
+  officer User            @relation("OfficerApprovals", fields: [officerId], references: [id])
+
+  @@unique([requestId, officerId])
+  @@map("approvals")
+}
+
+// ─── AUDIT LOGS ───────────────────────────────────────────────────────────────
+model AuditLog {
+  id           String   @id @default(uuid())
+  actorId      String   @map("actor_id")
+  eventType    String   @map("event_type")
+  eventData    Json     @map("event_data")
+  previousHash String   @map("previous_hash")
+  currentHash  String   @map("current_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+// ─── RESULTS ──────────────────────────────────────────────────────────────────
+model Result {
+  id          String   @id @default(uuid())
+  electionId  String   @map("election_id")
+  candidateId String   @map("candidate_id")
+  positionId  String   @map("position_id")
+  voteCount   Int      @default(0) @map("vote_count")
+  publishedAt DateTime @default(now()) @map("published_at")
+
+  @@unique([electionId, candidateId])
+  @@map("results")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ElectionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  SCHEDULED
+  ACTIVE
+  CLOSED
+  RESULTS_PENDING
+  ARCHIVED
+}
+
+enum CandidateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum ApprovalActionType {
+  ELECTION_ACTIVATE
+  ELECTION_CLOSE
+  RESULTS_PUBLISH
+  CANDIDATE_APPROVE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ApprovalDecision {
+  APPROVE
+  REJECT
+}
