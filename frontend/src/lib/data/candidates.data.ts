@@ -1,3 +1,5 @@
+import { Candidate } from "@/lib/types";
+
 export const mockCandidates: Candidate[] = [
   {
     id: "cand-001",

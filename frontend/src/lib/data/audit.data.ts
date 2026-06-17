@@ -1,3 +1,5 @@
+import { AuditLog } from "@/lib/types";
+
 export const mockAuditLogs: AuditLog[] = [
   {
     id: "log-001",

@@ -1,10 +1,8 @@
+import { Election, CreateElectionPayload } from "@/lib/types";
 import { mockElections } from "@/lib/data/elections.data";
-// import { apiClient } from "@/lib/api/client";  ← uncomment when ready
 
 export const electionsService = {
   async getAll(): Promise<Election[]> {
-    // MOCK: return mockElections;
-    // REAL: return apiClient.get('/elections');
     return mockElections;
   },
 
@@ -13,7 +11,13 @@ export const electionsService = {
   },
 
   async create(payload: CreateElectionPayload): Promise<Election> {
-    // Mock: simulate creation
-    return { ...payload, id: crypto.randomUUID(), status: "DRAFT", createdAt: new Date().toISOString() };
-  }
+  return {
+    ...payload,
+    id: crypto.randomUUID(),
+    status: "DRAFT",
+    createdAt: new Date().toISOString(),
+    createdBy: "mock-admin-001",
+    positions: [],
+  };
+}
 };

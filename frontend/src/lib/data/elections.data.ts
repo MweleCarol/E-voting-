@@ -1,4 +1,4 @@
-import { Election } from "@/lib/types";
+import { Election, CreateElectionPayload } from "@/lib/types";
 
 export const mockElections: Election[] = [
   {

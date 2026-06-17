@@ -1,3 +1,5 @@
+import { ApprovalRequest } from "@/lib/types";
+
 export const mockApprovalRequests: ApprovalRequest[] = [
   {
     id: "approval-001",

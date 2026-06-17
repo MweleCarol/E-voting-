@@ -1,33 +1,201 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
+  /* ============================================================
+     SEVS custom palette — namespaced with --sevs- prefix so it
+     never collides with shadcn's own token names (--primary,
+     --accent, etc. below). Use these for SEVS-specific UI:
+     status badges, ballot states, civic branding.
+     ============================================================ */
+
   /* Primary — deep civic navy */
-  --color-primary: #1B2E4B;
-  --color-primary-light: #2A4570;
-  --color-primary-muted: #E8EDF5;
+  --sevs-primary: #1B2E4B;
+  --sevs-primary-light: #2A4570;
+  --sevs-primary-muted: #E8EDF5;
 
   /* Accent — election green (trust, go, verified) */
-  --color-accent: #1A7F5A;
-  --color-accent-light: #D1F0E4;
+  --sevs-accent: #1A7F5A;
+  --sevs-accent-light: #D1F0E4;
 
   /* Warning — amber for pending/approval states */
-  --color-warning: #B45309;
-  --color-warning-light: #FEF3C7;
+  --sevs-warning: #B45309;
+  --sevs-warning-light: #FEF3C7;
 
   /* Danger — for irreversible/destructive actions */
-  --color-danger: #B91C1C;
-  --color-danger-light: #FEE2E2;
+  --sevs-danger: #B91C1C;
+  --sevs-danger-light: #FEE2E2;
 
   /* Neutral scale */
-  --color-surface: #FFFFFF;
-  --color-surface-raised: #F8FAFC;
-  --color-border: #E2E8F0;
-  --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94A3B8;
+  --sevs-surface: #FFFFFF;
+  --sevs-surface-raised: #F8FAFC;
+  --sevs-border: #E2E8F0;
+  --sevs-text-primary: #0F172A;
+  --sevs-text-secondary: #475569;
+  --sevs-text-muted: #94A3B8;
 
+  /* Fonts — literal fallback values. If next/font is wired up in
+     layout.tsx, these get overridden by the font loader's own
+     CSS variables of the same name applied on <html>. Keeping
+     literal values here too means the page still looks correct
+     even if the font loader hasn't run yet (e.g. during a
+     same-render flash) or someone forgets to wire it up. */
+  --font-display: 'DM Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
---font-display: 'DM Sans', sans-serif;
---font-body: 'Inter', sans-serif;
---font-mono: 'JetBrains Mono', monospace;
+  /* ============================================================
+     shadcn/ui base tokens — left untouched so shadcn components
+     (Button, Card, Dialog, etc.) keep working out of the box.
+     ============================================================ */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+@theme inline {
+  /* shadcn mappings — these were previously self-referential
+     (--font-sans: var(--font-sans)) which resolves to nothing,
+     causing the browser to fall back to its default serif font.
+     Now correctly pointed at the actual font tokens above. */
+  --font-heading: var(--font-display);
+  --font-sans: var(--font-body);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* SEVS custom palette — exposed as Tailwind utilities,
+     e.g. bg-sevs-primary, text-sevs-accent, border-sevs-border */
+  --color-sevs-primary: var(--sevs-primary);
+  --color-sevs-primary-light: var(--sevs-primary-light);
+  --color-sevs-primary-muted: var(--sevs-primary-muted);
+  --color-sevs-accent: var(--sevs-accent);
+  --color-sevs-accent-light: var(--sevs-accent-light);
+  --color-sevs-warning: var(--sevs-warning);
+  --color-sevs-warning-light: var(--sevs-warning-light);
+  --color-sevs-danger: var(--sevs-danger);
+  --color-sevs-danger-light: var(--sevs-danger-light);
+  --color-sevs-surface: var(--sevs-surface);
+  --color-sevs-surface-raised: var(--sevs-surface-raised);
+  --color-sevs-border: var(--sevs-border);
+  --color-sevs-text-primary: var(--sevs-text-primary);
+  --color-sevs-text-secondary: var(--sevs-text-secondary);
+  --color-sevs-text-muted: var(--sevs-text-muted);
+
+  /* font-mono utility tied directly to the --font-mono token
+     declared in :root — no separate mapping needed here since
+     Tailwind v4 reads --font-mono natively for the font-mono class. */
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
