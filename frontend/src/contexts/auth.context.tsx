@@ -9,7 +9,6 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   login: (user: AuthenticatedUser) => void;
   logout: () => void;
-  /** Dev-only helper: swap the active mock identity by role. */
   switchRole: (role: UserRole) => void;
 }
 
@@ -27,13 +26,8 @@ function setRoleCookie(role: UserRole | null) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // MOCK: pre-seed with a default mock user for development.
-  // REAL: this should start as null and be hydrated from a session
-  // check (e.g. a /me request using the stored JWT) on mount.
   const [user, setUser] = useState<AuthenticatedUser | null>(mockCurrentUser);
 
-  // Keep the middleware-readable cookie in sync with whatever user
-  // is currently active, including on first mount.
   useEffect(() => {
     setRoleCookie(user?.role ?? null);
   }, [user]);
@@ -51,15 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        login,
-        logout,
-        switchRole,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, switchRole }}>
       {children}
     </AuthContext.Provider>
   );

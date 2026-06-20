@@ -12,22 +12,19 @@ interface StatusConfig {
   tone: StatusTone;
 }
 
-// Tone → Tailwind classes, built on the --sevs-* tokens from globals.css.
-// This is the ONLY place tone-to-color mapping lives. Every status badge
-// in the app should resolve through here, not through ad-hoc classNames.
 export const TONE_STYLES: Record<StatusTone, string> = {
-  neutral: "bg-muted text-muted-foreground border-border",
-  warning: "bg-sevs-warning-light text-sevs-warning border-sevs-warning/20",
-  info: "bg-sevs-primary-muted text-sevs-primary border-sevs-primary/20",
-  success: "bg-sevs-accent-light text-sevs-accent border-sevs-accent/20",
-  danger: "bg-sevs-danger-light text-sevs-danger border-sevs-danger/20",
+  neutral: "bg-sevs-surface-raised text-sevs-text-secondary border-sevs-border-strong",
+  warning: "bg-sevs-warning-dim text-sevs-warning border-sevs-warning/30",
+  info: "bg-sevs-accent-dim/20 text-sevs-accent border-sevs-accent/30",
+  success: "bg-sevs-success-dim text-sevs-success border-sevs-success/30",
+  danger: "bg-sevs-danger-dim text-sevs-danger border-sevs-danger/30",
 };
 
 export const ELECTION_STATUS_CONFIG: Record<ElectionStatus, StatusConfig> = {
   DRAFT: { label: "Draft", tone: "neutral" },
   PENDING_APPROVAL: { label: "Pending approval", tone: "warning" },
   SCHEDULED: { label: "Scheduled", tone: "info" },
-  ACTIVE: { label: "Active", tone: "success" },
+  ACTIVE: { label: "Live", tone: "success" },
   CLOSED: { label: "Closed", tone: "neutral" },
   ARCHIVED: { label: "Archived", tone: "neutral" },
 };

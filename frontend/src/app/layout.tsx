@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
-import { AuthProvider } from "@/contexts/auth.context";
+import { Providers } from "./providers";
 import { DevRoleSwitcher } from "@/components/shared/DevRoleSwitcher";
 import "./globals.css";
 
@@ -25,6 +25,18 @@ export const metadata: Metadata = {
   description: "Security-first electronic voting platform for university elections",
 };
 
+const noFlashScript = `
+(function() {
+  try {
+    var stored = localStorage.getItem('sevs-theme');
+    var theme = stored === 'light' ? 'light' : 'dark';
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: {
@@ -32,12 +44,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${dmSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
+      </head>
       <body className="font-body">
-        <AuthProvider>
+        <Providers>
           {children}
           <DevRoleSwitcher />
           <Toaster position="top-right" richColors />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

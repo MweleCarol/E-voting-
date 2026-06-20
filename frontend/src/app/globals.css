@@ -4,91 +4,127 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* ============================================================
-     SEVS custom palette — namespaced with --sevs- prefix so it
-     never collides with shadcn's own token names (--primary,
-     --accent, etc. below). Use these for SEVS-specific UI:
-     status badges, ballot states, civic branding.
-     ============================================================ */
-
-  /* Primary — deep civic navy */
-  --sevs-primary: #1B2E4B;
-  --sevs-primary-light: #2A4570;
-  --sevs-primary-muted: #E8EDF5;
-
-  /* Accent — election green (trust, go, verified) */
-  --sevs-accent: #1A7F5A;
-  --sevs-accent-light: #D1F0E4;
-
-  /* Warning — amber for pending/approval states */
-  --sevs-warning: #B45309;
-  --sevs-warning-light: #FEF3C7;
-
-  /* Danger — for irreversible/destructive actions */
-  --sevs-danger: #B91C1C;
-  --sevs-danger-light: #FEE2E2;
-
-  /* Neutral scale */
+ 
+  --sevs-bg: #F8FAFC;
   --sevs-surface: #FFFFFF;
-  --sevs-surface-raised: #F8FAFC;
+  --sevs-surface-raised: #F1F5F9;
+  --sevs-surface-hover: #E8EDF5;
   --sevs-border: #E2E8F0;
+  --sevs-border-strong: #CBD5E1;
+
+  --sevs-accent: #0E7490;
+  --sevs-accent-dim: #0891B2;
+  --sevs-accent-glow: rgba(14, 116, 144, 0.1);
+
+  --sevs-success: #15803D;
+  --sevs-success-dim: #DCFCE7;
+  --sevs-warning: #B45309;
+  --sevs-warning-dim: #FEF3C7;
+  --sevs-danger: #B91C1C;
+  --sevs-danger-dim: #FEE2E2;
+
   --sevs-text-primary: #0F172A;
   --sevs-text-secondary: #475569;
   --sevs-text-muted: #94A3B8;
 
-  /* Fonts — literal fallback values. If next/font is wired up in
-     layout.tsx, these get overridden by the font loader's own
-     CSS variables of the same name applied on <html>. Keeping
-     literal values here too means the page still looks correct
-     even if the font loader hasn't run yet (e.g. during a
-     same-render flash) or someone forgets to wire it up. */
   --font-display: 'DM Sans', sans-serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* ============================================================
-     shadcn/ui base tokens — left untouched so shadcn components
-     (Button, Card, Dialog, etc.) keep working out of the box.
-     ============================================================ */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* shadcn tokens — light */
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #0E7490;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #0F172A;
+  --muted: #F1F5F9;
+  --muted-foreground: #475569;
+  --accent: #F1F5F9;
+  --accent-foreground: #0F172A;
+  --destructive: #B91C1C;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #0E7490;
+  --chart-1: #0E7490;
+  --chart-2: #15803D;
+  --chart-3: #B45309;
+  --chart-4: #B91C1C;
+  --chart-5: #475569;
+  --radius: 0.5rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #0E7490;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F1F5F9;
+  --sidebar-accent-foreground: #0F172A;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #0E7490;
+}
+
+.dark {
+ 
+  --sevs-bg: #05070A;
+  --sevs-surface: #0B0F16;
+  --sevs-surface-raised: #11161F;
+  --sevs-surface-hover: #161C27;
+  --sevs-border: #1E2733;
+  --sevs-border-strong: #2A3644;
+
+  --sevs-accent: #22D3EE;
+  --sevs-accent-dim: #0E7490;
+  --sevs-accent-glow: rgba(34, 211, 238, 0.15);
+
+  --sevs-success: #34D399;
+  --sevs-success-dim: rgba(52, 211, 153, 0.12);
+  --sevs-warning: #FBBF24;
+  --sevs-warning-dim: rgba(251, 191, 36, 0.12);
+  --sevs-danger: #F87171;
+  --sevs-danger-dim: rgba(248, 113, 113, 0.12);
+
+  --sevs-text-primary: #E6EDF3;
+  --sevs-text-secondary: #8B98A9;
+  --sevs-text-muted: #5A6678;
+
+ 
+  --background: #05070A;
+  --foreground: #E6EDF3;
+  --card: #0B0F16;
+  --card-foreground: #E6EDF3;
+  --popover: #11161F;
+  --popover-foreground: #E6EDF3;
+  --primary: #22D3EE;
+  --primary-foreground: #05070A;
+  --secondary: #161C27;
+  --secondary-foreground: #E6EDF3;
+  --muted: #11161F;
+  --muted-foreground: #8B98A9;
+  --accent: #161C27;
+  --accent-foreground: #E6EDF3;
+  --destructive: #F87171;
+  --border: #1E2733;
+  --input: #1E2733;
+  --ring: #22D3EE;
+  --chart-1: #22D3EE;
+  --chart-2: #34D399;
+  --chart-3: #FBBF24;
+  --chart-4: #F87171;
+  --chart-5: #8B98A9;
+  --sidebar: #0B0F16;
+  --sidebar-foreground: #E6EDF3;
+  --sidebar-primary: #22D3EE;
+  --sidebar-primary-foreground: #05070A;
+  --sidebar-accent: #161C27;
+  --sidebar-accent-foreground: #E6EDF3;
+  --sidebar-border: #1E2733;
+  --sidebar-ring: #22D3EE;
 }
 
 @theme inline {
-  /* shadcn mappings — these were previously self-referential
-     (--font-sans: var(--font-sans)) which resolves to nothing,
-     causing the browser to fall back to its default serif font.
-     Now correctly pointed at the actual font tokens above. */
   --font-heading: var(--font-display);
   --font-sans: var(--font-body);
 
@@ -131,61 +167,23 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* SEVS custom palette — exposed as Tailwind utilities,
-     e.g. bg-sevs-primary, text-sevs-accent, border-sevs-border */
-  --color-sevs-primary: var(--sevs-primary);
-  --color-sevs-primary-light: var(--sevs-primary-light);
-  --color-sevs-primary-muted: var(--sevs-primary-muted);
-  --color-sevs-accent: var(--sevs-accent);
-  --color-sevs-accent-light: var(--sevs-accent-light);
-  --color-sevs-warning: var(--sevs-warning);
-  --color-sevs-warning-light: var(--sevs-warning-light);
-  --color-sevs-danger: var(--sevs-danger);
-  --color-sevs-danger-light: var(--sevs-danger-light);
+  --color-sevs-bg: var(--sevs-bg);
   --color-sevs-surface: var(--sevs-surface);
   --color-sevs-surface-raised: var(--sevs-surface-raised);
+  --color-sevs-surface-hover: var(--sevs-surface-hover);
   --color-sevs-border: var(--sevs-border);
+  --color-sevs-border-strong: var(--sevs-border-strong);
+  --color-sevs-accent: var(--sevs-accent);
+  --color-sevs-accent-dim: var(--sevs-accent-dim);
+  --color-sevs-success: var(--sevs-success);
+  --color-sevs-success-dim: var(--sevs-success-dim);
+  --color-sevs-warning: var(--sevs-warning);
+  --color-sevs-warning-dim: var(--sevs-warning-dim);
+  --color-sevs-danger: var(--sevs-danger);
+  --color-sevs-danger-dim: var(--sevs-danger-dim);
   --color-sevs-text-primary: var(--sevs-text-primary);
   --color-sevs-text-secondary: var(--sevs-text-secondary);
   --color-sevs-text-muted: var(--sevs-text-muted);
-
-  /* font-mono utility tied directly to the --font-mono token
-     declared in :root — no separate mapping needed here since
-     Tailwind v4 reads --font-mono natively for the font-mono class. */
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
 }
 
 @layer base {
@@ -193,9 +191,34 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-200;
+  }
+  .dark body {
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.04), transparent 60%);
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .sevs-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sevs-glow-accent {
+    box-shadow: 0 0 0 1px var(--sevs-accent-dim);
+  }
+  .dark .sevs-glow-accent {
+    box-shadow: 0 0 0 1px var(--sevs-accent-dim), 0 0 12px 0 var(--sevs-accent-glow);
+  }
+
+  .sevs-panel {
+    background-color: var(--sevs-surface);
+    border: 1px solid var(--sevs-border);
   }
 }

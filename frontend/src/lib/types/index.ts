@@ -36,6 +36,8 @@ export type ApprovalDecision = "PENDING" | "APPROVED" | "REJECTED";
 
 export type ApprovalRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
+export type VoterRegistrationStatus = "PENDING" | "VERIFIED" | "REJECTED";
+
 // ---------- Users / Students ----------
 
 export interface StudentProfile {
@@ -51,6 +53,17 @@ export interface AuthenticatedUser {
   email: string;
   role: UserRole;
   student: StudentProfile | null;
+}
+
+// ---------- Voter Registration ----------
+
+export interface VoterRegistration {
+  id: string;
+  studentId: string;
+  verified: boolean;
+  status: VoterRegistrationStatus;
+  verifiedBy: string | null;
+  verifiedAt: string | null;
 }
 
 // ---------- Elections ----------
@@ -115,6 +128,17 @@ export interface VoteReceipt {
 export interface CastVotePayload {
   electionId: string;
   selections: Array<{ positionId: string; candidateId: string }>;
+}
+
+// Client-side record of a vote the current user has cast. See the
+// design note in voting-history.data.ts — this intentionally does NOT
+// mirror a real backend table, because identity-vote separation means
+// no backend query can map a student to their vote.
+export interface VotingHistoryEntry {
+  electionId: string;
+  electionTitle: string;
+  votedAt: string;
+  receiptCode: string;
 }
 
 // ---------- Approvals ----------

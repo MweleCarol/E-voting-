@@ -1,8 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-// A single card-shaped skeleton — matches the shape of ElectionCard /
-// CandidateCard so loading states don't cause layout jump when real
-// content arrives.
 export function CardSkeleton() {
   return (
     <div className="rounded-xl border border-sevs-border bg-sevs-surface p-4 space-y-3">
@@ -16,8 +13,6 @@ export function CardSkeleton() {
   );
 }
 
-// A grid of card skeletons — drop in wherever a list of elections,
-// candidates, or approval requests is loading.
 export function CardSkeletonGrid({ count = 3 }: { count?: number }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -28,7 +23,6 @@ export function CardSkeletonGrid({ count = 3 }: { count?: number }) {
   );
 }
 
-// Row-shaped skeleton for tables (audit log, results tables).
 export function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
   return (
     <div className="flex items-center gap-4 border-b border-sevs-border px-4 py-3">

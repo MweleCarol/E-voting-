@@ -6,11 +6,6 @@ import type { UserRole } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { ShieldCheck, X } from "lucide-react";
 
-// Renders ONLY in development. Lets you swap the active mock identity
-// without going through login/OTP, so every role-gated screen can be
-// checked in seconds. Remove or guard this more strictly before any
-// real deployment — it bypasses auth entirely by design.
-
 const ROLE_LABELS: Record<UserRole, string> = {
   STUDENT: "Student",
   CANDIDATE: "Candidate",
@@ -30,10 +25,8 @@ export function DevRoleSwitcher() {
   return (
     <div className="fixed bottom-4 right-4 z-50">
       {open && (
-        <div className="mb-2 w-56 rounded-lg border border-sevs-border bg-sevs-surface p-2 shadow-lg">
-          <p className="px-2 pb-1.5 text-xs font-medium uppercase tracking-wide text-sevs-text-muted">
-            Dev: switch role
-          </p>
+        <div className="sevs-panel mb-2 w-56 rounded-lg p-2 shadow-lg">
+          <p className="sevs-tag px-2 pb-1.5 text-sevs-text-muted">Dev: switch role</p>
           <div className="space-y-0.5">
             {(Object.keys(ROLE_LABELS) as UserRole[]).map((role) => (
               <button
@@ -42,8 +35,8 @@ export function DevRoleSwitcher() {
                 className={cn(
                   "w-full rounded-md px-2 py-1.5 text-left text-sm transition-colors",
                   user?.role === role
-                    ? "bg-sevs-primary-muted text-sevs-primary font-medium"
-                    : "text-sevs-text-secondary hover:bg-muted"
+                    ? "bg-sevs-accent-dim/20 text-sevs-accent font-medium"
+                    : "text-sevs-text-secondary hover:bg-sevs-surface-hover"
                 )}
               >
                 {ROLE_LABELS[role]}
@@ -55,7 +48,7 @@ export function DevRoleSwitcher() {
 
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-sevs-primary text-white shadow-lg hover:bg-sevs-primary-light transition-colors"
+        className="flex h-11 w-11 items-center justify-center rounded-full bg-sevs-accent text-sevs-bg shadow-lg hover:bg-sevs-accent/90 transition-colors"
         aria-label="Toggle dev role switcher"
       >
         {open ? <X className="h-5 w-5" /> : <ShieldCheck className="h-5 w-5" />}

@@ -1,8 +1,7 @@
 import type { AuthenticatedUser } from "@/lib/types";
 
-// One realistic mock user per role. The DevRoleSwitcher cycles through
-// these by key. Keep admissionNo format consistent with DeKUT's real
-// pattern (D021/XXXX/20XX) for academic defensibility in screenshots/demo.
+// One realistic mock user per role, used by DevRoleSwitcher. Admission
+// numbers follow DeKUT's real format (D021/XXXX/20XX).
 
 export const mockUsersByRole: Record<AuthenticatedUser["role"], AuthenticatedUser> = {
   STUDENT: {
@@ -13,7 +12,7 @@ export const mockUsersByRole: Record<AuthenticatedUser["role"], AuthenticatedUse
       id: "std-001",
       admissionNo: "D021/0001/2021",
       fullName: "Amina Wanjiru",
-      school: "School of Computing & IT",
+      school: "School of Computing & Information Technology",
       yearOfStudy: 4,
     },
   },
@@ -25,7 +24,7 @@ export const mockUsersByRole: Record<AuthenticatedUser["role"], AuthenticatedUse
       id: "std-002",
       admissionNo: "D021/0042/2022",
       fullName: "Brian Kamau",
-      school: "School of Engineering",
+      school: "School of Engineering Technology",
       yearOfStudy: 3,
     },
   },
@@ -61,6 +60,25 @@ export const mockUsersByRole: Record<AuthenticatedUser["role"], AuthenticatedUse
   },
 };
 
-// Default user when the app boots with no session — kept as STUDENT
-// to match the primary user journey you're building first.
+// Extra student/candidate records referenced by candidates.data.ts and
+// elections that aren't part of the 7 role-switcher identities above
+// (e.g. opposing candidates in a race). Not selectable via DevRoleSwitcher
+// directly, but their IDs are used consistently across mock files.
+export const mockExtraStudents = {
+  cynthia: {
+    id: "std-003",
+    admissionNo: "D021/0089/2021",
+    fullName: "Cynthia Achieng",
+    school: "School of Business & Economics",
+    yearOfStudy: 4,
+  },
+  david: {
+    id: "std-004",
+    admissionNo: "D021/0117/2023",
+    fullName: "David Mutiso",
+    school: "School of Computing & Information Technology",
+    yearOfStudy: 2,
+  },
+};
+
 export const mockCurrentUser: AuthenticatedUser = mockUsersByRole.STUDENT;

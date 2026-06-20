@@ -26,34 +26,29 @@ function BadgeShell({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+        "sevs-tag inline-flex items-center gap-1.5 rounded-md border px-2 py-1",
         TONE_STYLES[tone],
-        className,
+        tone === "success" && "sevs-glow-accent",
+        className
       )}
     >
       {tone === "success" && (
-        <span
-          className="h-1.5 w-1.5 rounded-full bg-sevs-accent animate-pulse"
-          aria-hidden
-        />
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sevs-success opacity-75" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sevs-success" />
+        </span>
       )}
       {label}
     </span>
   );
 }
 
-// Use the variant matching the entity you're displaying. Each one is
-// type-safe against the actual status union, so an invalid status value
-// is a compile error, not a silent fallback.
-
 export function ElectionStatusBadge({
   status,
   className,
 }: { status: ElectionStatus } & BaseBadgeProps) {
   const config = ELECTION_STATUS_CONFIG[status];
-  return (
-    <BadgeShell label={config.label} tone={config.tone} className={className} />
-  );
+  return <BadgeShell label={config.label} tone={config.tone} className={className} />;
 }
 
 export function CandidateStatusBadge({
@@ -61,9 +56,7 @@ export function CandidateStatusBadge({
   className,
 }: { status: CandidateStatus } & BaseBadgeProps) {
   const config = CANDIDATE_STATUS_CONFIG[status];
-  return (
-    <BadgeShell label={config.label} tone={config.tone} className={className} />
-  );
+  return <BadgeShell label={config.label} tone={config.tone} className={className} />;
 }
 
 export function ApprovalDecisionBadge({
@@ -71,9 +64,7 @@ export function ApprovalDecisionBadge({
   className,
 }: { decision: ApprovalDecision } & BaseBadgeProps) {
   const config = APPROVAL_DECISION_CONFIG[decision];
-  return (
-    <BadgeShell label={config.label} tone={config.tone} className={className} />
-  );
+  return <BadgeShell label={config.label} tone={config.tone} className={className} />;
 }
 
 export function ApprovalRequestStatusBadge({
@@ -81,7 +72,5 @@ export function ApprovalRequestStatusBadge({
   className,
 }: { status: ApprovalRequestStatus } & BaseBadgeProps) {
   const config = APPROVAL_REQUEST_STATUS_CONFIG[status];
-  return (
-    <BadgeShell label={config.label} tone={config.tone} className={className} />
-  );
+  return <BadgeShell label={config.label} tone={config.tone} className={className} />;
 }
