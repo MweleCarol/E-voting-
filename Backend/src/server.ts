@@ -1,6 +1,9 @@
-import app from './app';
+import 'dotenv/config'
+
+
 import { config } from '@config/index.js';
 import { logger } from '@config/logger';
+import app from './app';
 
 const startServer = async (): Promise<void> => {
   try {

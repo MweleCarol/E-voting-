@@ -30,7 +30,7 @@ model User {
   id           String   @id @default(uuid())
   email        String   @unique
   passwordHash String   @map("password_hash")
-  status       UserStatus @default(ACTIVE)
+  status       UserStatus @default(PENDING_ACTIVATION)
   roleId       String   @map("role_id")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -43,6 +43,7 @@ model User {
   approvals           Approval[]        @relation("OfficerApprovals")
   totpSecret          TotpSecret?
   refreshTokens       RefreshToken[]
+   activations         AccountActivation[]   // ← add this line
 
   @@map("users")
 }
@@ -263,8 +264,22 @@ model Result {
   @@map("results")
 }
 
+
+model AccountActivation {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  user       User      @relation(fields: [userId], references: [id])
+  codeHash   String    @map("code_hash")
+  expiresAt  DateTime  @map("expires_at")
+  usedAt     DateTime? @map("used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("account_activations")
+}
+
 // ─── ENUMS ────────────────────────────────────────────────────────────────────
 enum UserStatus {
+  PENDING_ACTIVATION 
   ACTIVE
   INACTIVE
   SUSPENDED

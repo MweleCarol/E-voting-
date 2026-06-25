@@ -24,11 +24,11 @@ export const config = {
     refreshSecret: requireEnv('JWT_REFRESH_SECRET'),
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+    mfaPendingExpiresIn: process.env.JWT_MFA_EXPIRES_IN ?? '5m',
   },
-  encryption: {
-    voteKey: requireEnv('VOTE_ENCRYPTION_KEY'),
-    ivLength: parseInt(process.env.VOTE_ENCRYPTION_IV_LENGTH ?? '12', 10),
-  },
+  // encryption block removed — VOTE_ENCRYPTION_KEY, VOTE_SIGNING_PRIVATE_KEY,
+  // and VOTE_SIGNING_PUBLIC_KEY are read and validated EXCLUSIVELY by
+  // src/security/key-management.service.ts. No other module touches them.
   security: {
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS ?? '12', 10),
     totpIssuer: process.env.TOTP_ISSUER ?? 'SEVS',

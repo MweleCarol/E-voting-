@@ -10,7 +10,7 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
-    "test": "jest --runInBand",
+    "test": "node node_modules/jest/bin/jest.js",
     "test:watch": "jest --watch",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
