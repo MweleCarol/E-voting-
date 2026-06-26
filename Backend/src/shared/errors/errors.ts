@@ -178,3 +178,23 @@ export class CryptographicError extends AppError {
     super(message, HTTP_STATUS.INTERNAL_SERVER_ERROR, ERROR_CODES.CRYPTOGRAPHIC_ERROR, false);
   }
 }
+
+
+
+// ---------------------------------------------------------------------------
+// 403 — Forbidden Error (resource-level, not role-level)
+// ---------------------------------------------------------------------------
+/**
+ * Thrown when an authenticated user holds a role that legitimately permits
+ * this ROUTE, but they are attempting to act on a specific RESOURCE they do
+ * not own or are not scoped to.
+ *
+ * Distinct from AuthorizationError, which fires when the role itself never
+ * permits the action — this fires when the role permits it in general, but
+ * not for this particular row.
+ */
+export class ForbiddenError extends AppError {
+  constructor(message: string = 'You do not have access to this resource') {
+    super(message, HTTP_STATUS.FORBIDDEN, ERROR_CODES.FORBIDDEN);
+  }
+}

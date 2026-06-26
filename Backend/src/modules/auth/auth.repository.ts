@@ -91,7 +91,7 @@ export async function consumeActivationCodeAndActivateUser(
  */
 export async function findActiveUserByIdentifier(
   identifier: string,
-): Promise<{ id: string; passwordHash: string; roleId: string } | null> {
+): Promise<{ id: string; passwordHash: string | null; roleId: string } | null> {
   return prisma.user.findFirst({
     where: {
       status: 'ACTIVE',

@@ -29,7 +29,8 @@ model Role {
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
-  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  passwordHash String?   @map("password_hash")
   status       UserStatus @default(PENDING_ACTIVATION)
   roleId       String   @map("role_id")
   createdAt    DateTime @default(now()) @map("created_at")
@@ -81,7 +82,6 @@ model Student {
   id          String @id @default(uuid())
   userId      String @unique @map("user_id")
   admissionNo String @unique @map("admission_no")
-  fullName    String @map("full_name")
   school      String
   yearOfStudy Int    @map("year_of_study")
 

@@ -74,6 +74,10 @@ export const ERROR_CODES = {
 
   // --- Audit ---
   AUDIT_CHAIN_BROKEN: 'AUDIT_CHAIN_BROKEN',
+
+
+  //FORBIDDEN
+  FORBIDDEN: 'FORBIDDEN ACCESS'
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

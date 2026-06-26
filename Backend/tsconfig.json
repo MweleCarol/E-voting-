@@ -21,9 +21,10 @@
       "@config/*": ["src/config/*"],
       "@middleware/*": ["src/middleware/*"],
       "@database/*": ["src/database/*"],
-      "@security/*": ["src/security/*"]
-    }
+      "@security/*": ["src/security/*"],
+      "@generated/*": ["src/generated/*"],
+    },
   },
-  "include": ["src/**/*", "prisma/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

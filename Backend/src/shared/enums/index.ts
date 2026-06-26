@@ -35,7 +35,7 @@ export {
   ApprovalActionType,
   ApprovalStatus,
   ApprovalDecision,
-} from '../../generated/prisma';
+} from '@generated/prisma/client';
 
 /**
  * Election state machine — valid transitions only.

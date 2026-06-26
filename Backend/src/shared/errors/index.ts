@@ -12,4 +12,5 @@ export {
   ElectionStateError,
   DoubleVotingError,
   CryptographicError,
+  ForbiddenError,
 } from './errors';

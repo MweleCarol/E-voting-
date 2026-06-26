@@ -15,7 +15,6 @@ const ROLES = [
   'ELECTION_OFFICER',
   'VERIFICATION_OFFICER',
   'STUDENT',
-  'CANDIDATE',
   'AUDITOR',
   'OBSERVER',
 ] as const;
@@ -48,6 +47,7 @@ async function seedAdminUser(adminRoleId: string): Promise<void> {
     update: {},
     create: {
       email: 'carolyne@devs.com',
+      fullName: 'Carolyne Admin',
       passwordHash,
       status: UserStatus.ACTIVE,
       roleId: adminRoleId,

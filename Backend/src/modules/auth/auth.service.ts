@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { config } from '@config/index';
 import { logger } from '@config/logger';
 import { generateSecret, generateURI, generate, verify } from 'otplib';
-import { AuthenticationError,NotFoundError } from '@shared/errors';
+import { AuthenticationError, NotFoundError } from '@shared/errors';
 import { sha256, timingSafeHexEqual } from '@security/hashing.service';
 
 import {
@@ -11,7 +11,7 @@ import {
   signMfaPendingToken,
   generateRefreshToken,
   hashRefreshToken,
-  verifyMfaPendingToken
+  verifyMfaPendingToken,
 } from './token.util.js';
 import {
   findPendingUserByAdmissionAndEmail,
@@ -40,7 +40,6 @@ import type {
   TotpConfirmInput,
   TotpLoginInput,
 } from './auth.types.js';
-
 
 const ACTIVATION_CODE_LENGTH = 6;
 const ACTIVATION_CODE_TTL_MINUTES = 10; // tunable in principle, hardcoded for now — not a crypto-mandated value like the GCM IV length, just not worth a config entry yet
@@ -167,8 +166,18 @@ export async function login(input: LoginInput): Promise<LoginResult> {
    * otherwise — means the expensive work happens every time,
    * regardless of outcome.
    */
-  const passwordMatches = await bcrypt.compare(input.password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
+  const passwordMatches = await bcrypt.compare(
+    input.password,
+    user?.passwordHash ?? DUMMY_PASSWORD_HASH,
+  );
 
+  if (user && user.passwordHash === null) {
+    // Should be unreachable — ACTIVE status and a real passwordHash are
+    // set together, atomically, in consumeActivationCodeAndActivateUser.
+    // If this ever logs, it means that invariant has been violated
+    // somewhere else — a real bug, not a user-facing auth failure.
+    logger.warn(`Data integrity violation: ACTIVE user ${user.id} has null passwordHash.`);
+  }
   if (!user || !passwordMatches) {
     throw new AuthenticationError('Invalid credentials.');
   }
@@ -184,8 +193,6 @@ export async function login(input: LoginInput): Promise<LoginResult> {
   return { status: 'AUTHENTICATED', tokens };
 }
 
-
-
 // ---------------------------------------------------------------------
 // TOTP enrollment
 // ---------------------------------------------------------------------
@@ -199,7 +206,6 @@ export async function login(input: LoginInput): Promise<LoginResult> {
  * standard practice for production TOTP implementations.
  */
 const TOTP_EPOCH_TOLERANCE_STEPS = 1;
-
 
 export async function setupTotp(userId: string): Promise<TotpSetupResult> {
   const user = await findUserById(userId);
