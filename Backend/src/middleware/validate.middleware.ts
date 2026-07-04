@@ -70,17 +70,26 @@ export function validate(schemas: ValidationTargets) {
       const result = schema.safeParse(source);
 
       if (!result.success) {
-        // Flatten Zod's error structure into { fieldName: [errorMessages] }
-        // This format is frontend-friendly — each field maps to its error messages.
-        const fieldErrors = result.error.flatten().fieldErrors as Record<string, string[] | undefined>;
+        const fieldErrors = result.error.flatten().fieldErrors as Record<
+          string,
+          string[] | undefined
+        >;
         for (const [field, messages] of Object.entries(fieldErrors)) {
           if (messages && messages.length > 0) {
             errors[`${key}.${field}`] = messages;
           }
         }
+      } else if (key === 'query') {
+        // Express 5: req.query is a getter-only property on the prototype.
+        // Plain assignment throws; redefining it as an own, writable property
+        // on this request object overrides the getter for this request only.
+        Object.defineProperty(req, 'query', {
+          value: result.data,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        });
       } else {
-        // Replace raw input with Zod's parsed output (stripped + coerced)
-        // Type assertion is safe because Zod guarantees the shape
         (req as unknown as Record<string, unknown>)[key] = result.data;
       }
     }

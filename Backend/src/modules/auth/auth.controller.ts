@@ -11,6 +11,8 @@ import {
   logout,
   setupTotp,
   confirmTotpSetup,
+  verifyStaffActivation,
+  initiateStaffActivation,
 } from './auth.service.js';
 import type {
   ActivationInitiateInput,
@@ -46,6 +48,18 @@ export const loginHandler = asyncHandler(async (req: Request, res: Response) => 
     return;
   }
 
+  if (result.status === 'TOTP_SETUP_REQUIRED') {
+    sendSuccess(
+      res,
+      { totpSetupRequired: true, accessToken: result.accessToken },
+      'Two-factor authentication setup required before your first login.',
+      HTTP_STATUS.OK,
+    );
+    return;
+  }
+
+  // result.status === 'AUTHENTICATED' — TypeScript now knows this is
+  // the only remaining member; result.tokens is safe without a cast.
   sendSuccess(res, result.tokens, 'Login successful.', HTTP_STATUS.OK);
 });
 
@@ -83,3 +97,22 @@ export const confirmTotpHandler = asyncHandler(async (req: Request, res: Respons
   await confirmTotpSetup(req.user!.userId, req.body as TotpConfirmInput);
   sendSuccess(res, null, 'TOTP enabled successfully.', HTTP_STATUS.OK);
 });
+
+
+export async function initiateStaffActivationHandler(req: Request, res: Response): Promise<void> {
+  await initiateStaffActivation(req.body);
+  sendSuccess(res, null, 'If that email matches a pending account, an activation code has been sent.');
+}
+
+export async function verifyStaffActivationHandler(req: Request, res: Response): Promise<void> {
+  const result = await verifyStaffActivation(req.body);
+  if (result.status === 'TOTP_SETUP_REQUIRED') {
+    sendSuccess(
+      res,
+      { totpSetupRequired: true, accessToken: result.accessToken },
+      'Account activated. You must set up two-factor authentication before your first login.',
+    );
+  } else {
+    sendSuccess(res, result.tokens, 'Account activated successfully.');
+  }
+}

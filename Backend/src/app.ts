@@ -9,7 +9,7 @@ import { errorHandler } from '@middleware/errorHandler.middleware';
 
 //Routes
 import authRouter from '@modules/auth/auth.router'
-
+import  userRouter from '@modules/users/users.router'
 const app: Application = express();
 
 // ─── Security Middleware ───────────────────────────────────────────────────────
@@ -50,6 +50,7 @@ app.get('/health', (_req: Request, res: Response) => {
 // app.use(`/api/${config.server.apiVersion}/users`, usersRouter);
 // ... more routes added per milestone
 app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/users',userRouter)
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 // Throws a NotFoundError which flows into the global error handler below,

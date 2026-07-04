@@ -1,0 +1,67 @@
+# 1. Login as the seeded admin to get a real access token
+curl -X POST http://localhost:3000/api/v1/auth/login -H "Content-Type: application/json" -d "{\"identifier\":\"carolyne@devs.com\",\"password\":\"Carolyne@123\"}"
+
+# 2. List users (use the accessToken from step 1)
+curl http://localhost:3000/api/v1/users -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwdXJwb3NlIjoiYWNjZXNzIiwidXNlcklkIjoiYjFlMjc5ZGMtMmJlMy00ODRjLWJmMDgtNjhjZWQ5ZDA5Y2VmIiwicm9sZUlkIjoiYTg0NTY5YWQtODdmYy00ZGFlLTg5ZWItNGU1NTBlMWIwMjQ4IiwiaWF0IjoxNzgyNzQzMzMwLCJleHAiOjE3ODI3NDQyMzB9.9nkLnrV6aULVxyhZtQ4G9k_j5rqhqxAJTbkLnB3WlZY"
+
+# 3. Create a single officer account
+curl -X POST http://localhost:3000/api/v1/users -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwdXJwb3NlIjoiYWNjZXNzIiwidXNlcklkIjoiYjFlMjc5ZGMtMmJlMy00ODRjLWJmMDgtNjhjZWQ5ZDA5Y2VmIiwicm9sZUlkIjoiYTg0NTY5YWQtODdmYy00ZGFlLTg5ZWItNGU1NTBlMWIwMjQ4IiwiaWF0IjoxNzgyNzQzMzMwLCJleHAiOjE3ODI3NDQyMzB9.9nkLnrV6aULVxyhZtQ4G9k_j5rqhqxAJTbkLnB3WlZY" -H "Content-Type: application/json" -d "{\"email\":\"officer1@dkut.ac.ke\",\"fullName\":\"Test Officer\",\"role\":\"ELECTION_OFFICER\"}"
+
+# 4. Bulk import (point at a real small CSV file)
+curl -X POST http://localhost:3000/api/v1/users/students/import -H "Authorization: Bearer "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwdXJwb3NlIjoiYWNjZXNzIiwidXNlcklkIjoiYjFlMjc5ZGMtMmJlMy00ODRjLWJmMDgtNjhjZWQ5ZDA5Y2VmIiwicm9sZUlkIjoiYTg0NTY5YWQtODdmYy00ZGFlLTg5ZWItNGU1NTBlMWIwMjQ4IiwiaWF0IjoxNzgyNzQ0NTM2LCJleHAiOjE3ODI3NDU0MzZ9.eBaIbX_9r0he1MCrNqBVfH_9Ect8l9oZ-y1VdbDBQU4" -F "file=@students_sample.csv"
+
+
+
+step 1  response
+{
+    "success": true,
+    "message": "Login successful.",
+    "data": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwdXJwb3NlIjoiYWNjZXNzIiwidXNlcklkIjoiYjFlMjc5ZGMtMmJlMy00ODRjLWJmMDgtNjhjZWQ5ZDA5Y2VmIiwicm9sZUlkIjoiYTg0NTY5YWQtODdmYy00ZGFlLTg5ZWItNGU1NTBlMWIwMjQ4IiwiaWF0IjoxNzgyNzQzMzMwLCJleHAiOjE3ODI3NDQyMzB9.9nkLnrV6aULVxyhZtQ4G9k_j5rqhqxAJTbkLnB3WlZY",
+        "refreshToken": "jNU9m78h2XhYdy3k-m8mwuLUaVzJ3R3bni4Sv-9lRFY"
+    }
+} 
+
+
+step2 
+
+{
+    "success": true,
+    "message": "Users retrieved.",
+    "data": {
+        "data": [
+            {
+                "id": "b1e279dc-2be3-484c-bf08-68ced9d09cef",
+                "email": "carolyne@devs.com",
+                "fullName": "Carolyne Admin",
+                "role": "SYSTEM_ADMIN",
+                "status": "ACTIVE",
+                "createdAt": "2026-06-25T11:06:13.659Z"
+            }
+        ],
+        "total": 1,
+        "page": 1,
+        "pageSize": 20
+    }
+}
+
+
+step3
+
+C:\Users\user>curl -X POST http://localhost:3000/api/v1/users -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwdXJwb3NlIjoiYWNjZXNzIiwidXNlcklkIjoiYjFlMjc5ZGMtMmJlMy00ODRjLWJmMDgtNjhjZWQ5ZDA5Y2VmIiwicm9sZUlkIjoiYTg0NTY5YWQtODdmYy00ZGFlLTg5ZWItNGU1NTBlMWIwMjQ4IiwiaWF0IjoxNzgyNzQzMzMwLCJleHAiOjE3ODI3NDQyMzB9.9nkLnrV6aULVxyhZtQ4G9k_j5rqhqxAJTbkLnB3WlZY" -H "Content-Type: application/json" -d "{\"email\":\"officer1@dkut.ac.ke\",\"fullName\":\"Test Officer\",\"role\":\"ELECTION_OFFICER\"}"
+{"success":true,"message":"User created.","data":{"id":"544c8d97-2fd0-41e1-bfe6-a6f725383be3","email":"officer1@dkut.ac.ke","fullName":"Test Officer","role":"ELECTION_OFFICER","status":"PENDING_ACTIVATION"}}
+
+step4
+{
+    "success": false,
+    "message": "Field name missing",
+    "errorCode": "VALIDATION_ERROR",
+    "statusCode": 400,
+    "stack": "Error: Field name missing\n    at <anonymous> (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\src\\modules\\users\\users.router.ts:43:19)\n    at IncomingMessage.onFinished (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\multer\\lib\\make-middleware.js:45:9)\n    at Object.onceWrapper (node:events:622:28)\n    at IncomingMessage.emit (node:events:508:28)\n    at endReadableNT (node:internal/streams/readable:1701:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)"
+}
+
+
+
+curl -X POST http://localhost:3000/api/v1/users/students/import ^
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwdXJwb3NlIjoiYWNjZXNzIiwidXNlcklkIjoiYjFlMjc5ZGMtMmJlMy00ODRjLWJmMDgtNjhjZWQ5ZDA5Y2VmIiwicm9sZUlkIjoiYTg0NTY5YWQtODdmYy00ZGFlLTg5ZWItNGU1NTBlMWIwMjQ4IiwiaWF0IjoxNzgzMTYyOTYwLCJleHAiOjE3ODMxNjM4NjB9.gEUclR1vPy6U6uQOmqeS6Ifyv049_wDXKWvQezDe4-I" ^
+  -F "file=@students_sample.csv"

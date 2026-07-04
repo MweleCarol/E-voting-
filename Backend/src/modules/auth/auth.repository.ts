@@ -197,3 +197,23 @@ export async function confirmTotpSecret(userId: string): Promise<void> {
 }
 
 
+/**
+ * Finds a PENDING_ACTIVATION user by email, excluding users who have
+ * a Student relation — email-only lookup is strictly for non-student
+ * (staff) accounts. A student who somehow calls the staff endpoint
+ * should get the same generic non-response as a completely unknown email,
+ * not accidentally activate via the weaker single-factor path.
+ */
+export async function findPendingStaffUserByEmail(
+  email: string,
+): Promise<{ id: string; roleId: string } | null> {
+  return prisma.user.findFirst({
+    where: {
+      email,
+      status: 'PENDING_ACTIVATION',
+      student: null, // excludes any user with a Student row
+    },
+    select: { id: true, roleId: true },
+  });
+}
+

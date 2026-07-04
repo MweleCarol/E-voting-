@@ -92,3 +92,21 @@ export const totpConfirmSchema = z.object({
     .length(6, 'Code must be exactly 6 digits')
     .regex(/^\d+$/, 'Code must contain only digits'),
 });
+
+
+
+
+
+export const staffActivationInitiateSchema = z.object({
+  body: z.object({
+    email: z.string().trim().toLowerCase().email('Invalid email address'),
+  }),
+});
+
+export const staffActivationVerifySchema = z.object({
+  body: z.object({
+    email: z.string().trim().toLowerCase().email('Invalid email address'),
+    otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must be numeric'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+  }),
+});

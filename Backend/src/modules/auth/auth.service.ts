@@ -5,7 +5,8 @@ import { logger } from '@config/logger';
 import { generateSecret, generateURI, generate, verify } from 'otplib';
 import { AuthenticationError, NotFoundError } from '@shared/errors';
 import { sha256, timingSafeHexEqual } from '@security/hashing.service';
-
+import { TOTP_REQUIRED_ROLES } from '@shared/constants/totp-required-roles.constants';
+import { getRoleName } from '@shared/cache/role.cache';
 import {
   signAccessToken,
   signMfaPendingToken,
@@ -27,7 +28,9 @@ import {
   findUserById,
   findValidRefreshTokenByHash,
   revokeRefreshToken,
+  findPendingStaffUserByEmail,
 } from './auth.repository.js';
+
 import type {
   ActivationInitiateInput,
   ActivationVerifyInput,
@@ -39,6 +42,9 @@ import type {
   TotpSetupResult,
   TotpConfirmInput,
   TotpLoginInput,
+  StaffActivationInitiateInput,
+  StaffActivationVerifyInput,
+  StaffActivationVerifyResult,
 } from './auth.types.js';
 
 const ACTIVATION_CODE_LENGTH = 6;
@@ -189,6 +195,21 @@ export async function login(input: LoginInput): Promise<LoginResult> {
     return { status: 'MFA_REQUIRED', mfaToken };
   }
 
+  // Branch 2: Role mandates TOTP but none is set up → block the session.
+  // This is the belt-and-suspenders check: verifyStaffActivation already
+  // forces enrollment, so this branch should only fire if that flow was
+  // bypassed somehow (direct DB edit, a future bug, etc.).
+  const roleName = await getRoleName(user.roleId);
+  const requiresTotp = roleName !== null && TOTP_REQUIRED_ROLES.has(roleName);
+
+  if (requiresTotp) {
+    logger.warn(
+      `Mandatory-TOTP role "${roleName}" (userId: ${user.id}) reached login without verified TOTP. Forcing setup.`,
+    );
+    const accessToken = signAccessToken(user.id, user.roleId);
+    return { status: 'TOTP_SETUP_REQUIRED', accessToken };
+  }
+
   const tokens = await issueTokenPair(user.id, user.roleId);
   return { status: 'AUTHENTICATED', tokens };
 }
@@ -314,4 +335,60 @@ export async function logout(input: LogoutInput): Promise<void> {
   }
 
   await revokeRefreshToken(existing.id);
+}
+
+export async function initiateStaffActivation(input: StaffActivationInitiateInput): Promise<void> {
+  const user = await findPendingStaffUserByEmail(input.email);
+
+  // Same anti-enumeration pattern as student initiation: no match → silent
+  // return. The controller sends the identical generic response either way.
+  if (!user) return;
+
+  const otp = generateNumericOtp();
+  const codeHash = sha256(otp);
+  const expiresAt = new Date(Date.now() + ACTIVATION_CODE_TTL_MINUTES * 60_000);
+
+  await createActivationCode(user.id, codeHash, expiresAt);
+
+  // TODO: replace with real email delivery — same gap as student activation.
+  logger.info(`[DEV ONLY] Staff activation OTP for ${input.email}: ${otp}`);
+}
+
+export async function verifyStaffActivation(
+  input: StaffActivationVerifyInput,
+): Promise<StaffActivationVerifyResult> {
+  const user = await findPendingStaffUserByEmail(input.email);
+  if (!user) {
+    throw new AuthenticationError('Invalid or expired activation code.');
+  }
+
+  const activation = await findValidActivationCode(user.id);
+  if (!activation) {
+    throw new AuthenticationError('Invalid or expired activation code.');
+  }
+
+  const submittedHash = sha256(input.otp);
+  if (!timingSafeHexEqual(activation.codeHash, submittedHash)) {
+    throw new AuthenticationError('Invalid or expired activation code.');
+  }
+
+  const passwordHash = await bcrypt.hash(input.password, config.security.bcryptRounds);
+  await consumeActivationCodeAndActivateUser(activation.id, user.id, passwordHash);
+
+  // After activation, check whether this role mandates TOTP enrollment.
+  const roleName = await getRoleName(user.roleId);
+  const requiresTotp = roleName !== null && TOTP_REQUIRED_ROLES.has(roleName);
+
+  if (requiresTotp) {
+    // Issue a real access token — scoped to this user, works for
+    // /auth/totp/setup and /auth/totp/confirm. No refresh token yet;
+    // a full session is only issued after TOTP is verified, via the
+    // next normal login attempt.
+    const accessToken = signAccessToken(user.id, user.roleId);
+    return { status: 'TOTP_SETUP_REQUIRED', accessToken };
+  }
+
+  // OBSERVER and any future non-mandatory role: full session immediately.
+  const tokens = await issueTokenPair(user.id, user.roleId);
+  return { status: 'ACTIVATED', tokens };
 }

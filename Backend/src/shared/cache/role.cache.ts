@@ -48,6 +48,24 @@ export async function getRoleIds(names: RoleName[]): Promise<string[]> {
   return Promise.all(names.map(getRoleId));
 }
 
+// Add below getRoleIds — needs the same warmed cache
+
+/**
+ * Resolves a role id back to its name.
+ * Used by login() to check TOTP requirements without a per-request DB call.
+ */
+export async function getRoleName(id: string): Promise<RoleName | null> {
+  if (!roleNameToId) {
+    loadingPromise ??= loadRoleCache();
+    await loadingPromise;
+    loadingPromise = null;
+  }
+  for (const [name, roleId] of roleNameToId!.entries()) {
+    if (roleId === id) return name as RoleName;
+  }
+  return null; // id not in the seeded set — caller decides what to do
+}
+
 /** Test/dev utility only — not used during normal request handling. */
 export function invalidateRoleCache(): void {
   roleNameToId = null;

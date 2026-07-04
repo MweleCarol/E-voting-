@@ -70,10 +70,6 @@ export interface LoginInput {
  * optional fields on both branches; that approach would let a typo
  * silently read `undefined` instead of failing to compile.
  */
-export type LoginResult =
-  | { status: 'AUTHENTICATED'; tokens: TokenPair }
-  | { status: 'MFA_REQUIRED'; mfaToken: string };
-
 export interface TotpLoginInput {
   mfaToken: string;
   code: string;
@@ -124,3 +120,34 @@ export interface AuthenticatedUser {
   userId: string;
   roleId: string;
 }
+
+
+
+
+export interface StaffActivationInitiateInput {
+  email: string;
+}
+
+export interface StaffActivationVerifyInput {
+  email: string;
+  otp: string;
+  password: string;
+}
+
+/**
+ * Discriminated union — same pattern as LoginResult.
+ * TOTP_SETUP_REQUIRED means: account is now ACTIVE, password set,
+ * but this role mandates TOTP. The access token is real and scoped
+ * to let the client immediately call /auth/totp/setup and /auth/totp/confirm.
+ * After confirm, the next login will issue a full session normally.
+ */
+export type StaffActivationVerifyResult =
+  | { status: 'ACTIVATED'; tokens: TokenPair }
+  | { status: 'TOTP_SETUP_REQUIRED'; accessToken: string };
+
+// Extend LoginResult — add the third branch
+// Replace the existing LoginResult type with:
+export type LoginResult =
+  | { status: 'AUTHENTICATED'; tokens: TokenPair }
+  | { status: 'MFA_REQUIRED'; mfaToken: string }
+  | { status: 'TOTP_SETUP_REQUIRED'; accessToken: string };
