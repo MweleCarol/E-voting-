@@ -293,6 +293,7 @@ enum ElectionStatus {
   CLOSED
   RESULTS_PENDING
   ARCHIVED
+  CANCELLED
 }
 
 enum CandidateStatus {
