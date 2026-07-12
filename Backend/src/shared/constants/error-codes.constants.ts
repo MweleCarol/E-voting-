@@ -77,7 +77,10 @@ export const ERROR_CODES = {
 
 
   //FORBIDDEN
-  FORBIDDEN: 'FORBIDDEN ACCESS'
+  FORBIDDEN: 'FORBIDDEN ACCESS',
+
+  //NOT IMPLEMENTED
+  NOT_IMPLEMENTED: 'NOT_IMPLEMENTED'
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

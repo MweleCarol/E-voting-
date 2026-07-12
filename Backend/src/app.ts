@@ -11,6 +11,7 @@ import { errorHandler } from '@middleware/errorHandler.middleware';
 import authRouter from '@modules/auth/auth.router'
 import  userRouter from '@modules/users/users.router'
 import {electionsRouter} from '@modules/elections/elections.router'
+import {approvalsRouter} from '@modules/approvals/approvals.router'
 
 const app: Application = express();
 
@@ -54,6 +55,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/users',userRouter)
 app.use('/api/v1/elections', electionsRouter);
+app.use('/api/v1/approvals', approvalsRouter);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 // Throws a NotFoundError which flows into the global error handler below,

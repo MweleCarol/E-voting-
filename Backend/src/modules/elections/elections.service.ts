@@ -33,6 +33,8 @@ import {
   createApprovalRequest,
 } from './elections.repository.js';
 
+import {Prisma} from "@generated/prisma/client";
+
 // ─── PRIVATE GUARD ────────────────────────────────────────────────────────────
 
 // Fetches the election and asserts the transition is allowed from its current
@@ -311,8 +313,9 @@ export async function removePosition(
 // branch in its own service logic without catching exceptions.
 export async function applyApprovalDecision(
   input: ApplyApprovalDecisionInput,
+  tx?: Prisma.TransactionClient,
 ): Promise<ApplyApprovalDecisionResult> {
-  const election = await findElectionForTransition(input.electionId);
+  const election = await findElectionForTransition(input.electionId, tx);
 
   if (!election) {
     return { outcome: 'not_found' };
@@ -325,14 +328,14 @@ export async function applyApprovalDecision(
     }
 
     if (input.approved) {
-      await updateElectionStatus(input.electionId, 'SCHEDULED');
+      await updateElectionStatus(input.electionId, 'SCHEDULED' , tx);
       logger.info('election.scheduled', {
         electionId: input.electionId,
         via:        'approval_decision',
       });
       return { outcome: 'election_scheduled', electionId: input.electionId };
     } else {
-      await updateElectionStatus(input.electionId, 'DRAFT');
+      await updateElectionStatus(input.electionId, 'DRAFT' , tx);
       logger.info('election.reverted_to_draft', {
         electionId: input.electionId,
         via:        'approval_decision',
@@ -348,7 +351,7 @@ export async function applyApprovalDecision(
     }
 
     if (input.approved) {
-      await updateElectionStatus(input.electionId, 'CLOSED');
+      await updateElectionStatus(input.electionId, 'CLOSED' , tx);
       logger.info('election.closed', {
         electionId: input.electionId,
         via:        'approval_decision',

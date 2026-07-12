@@ -13,4 +13,5 @@ export {
   DoubleVotingError,
   CryptographicError,
   ForbiddenError,
+  NotImplementedError,
 } from './errors';

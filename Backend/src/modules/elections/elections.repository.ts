@@ -1,7 +1,7 @@
 // src/modules/elections/elections.repository.ts
 
 import { prisma }         from '@database/client.js';
-import { ElectionStatus } from '@generated/prisma/client';
+import { ElectionStatus, Prisma } from '@generated/prisma/client';
 import type {
   CreateElectionInput,
   UpdateElectionInput,
@@ -116,8 +116,10 @@ export async function findElectionById(
 // Returns only what is needed to evaluate whether a transition is allowed.
 export async function findElectionForTransition(
   id: string,
+  tx?: Prisma.TransactionClient,
 ): Promise<{ id: string; status: ElectionStatus } | null> {
-  return prisma.election.findUnique({
+  const client = tx ?? prisma; // tx is optional, fallback to global prisma client
+  return client.election.findUnique({
     where:  { id },
     select: { id: true, status: true },
   });
@@ -195,8 +197,10 @@ export async function updateElection(
 export async function updateElectionStatus(
   id: string,
   status: ElectionStatus,
+  tx?: Prisma.TransactionClient,
 ): Promise<void> {
-  await prisma.election.update({
+  const client = tx ?? prisma;
+  await client.election.update({
     where: { id },
     data:  { status },
   });

@@ -198,3 +198,31 @@ export class ForbiddenError extends AppError {
     super(message, HTTP_STATUS.FORBIDDEN, ERROR_CODES.FORBIDDEN);
   }
 }
+
+
+
+// ---------------------------------------------------------------------------
+// 501 — Not Implemented Error
+// ---------------------------------------------------------------------------
+/**
+ * Thrown when a request is well-formed and reaches a code path that is
+ * intentionally unbuilt — not a client error, not a data error, a genuine
+ * "this handler does not exist yet" server condition.
+ *
+ * SEVS-specific case: an ApprovalRequest of an actionType (e.g.
+ * CANDIDATE_APPROVE, RESULTS_PUBLISH) reaches quorum resolution inside the
+ * Approvals module before the module that owns that action type (M10, M14)
+ * has registered a resolver. This should be structurally unreachable in
+ * production — those request rows can currently only be created by a direct
+ * DB insert, not through any real code path — so if it fires, it means the
+ * system is in a state that shouldn't exist, not that the user did anything
+ * wrong.
+ *
+ * isOperational = false: like CryptographicError, this warrants investigation
+ * rather than being treated as a routine, expected failure.
+ */
+export class NotImplementedError extends AppError {
+  constructor(message: string = 'This operation is not yet implemented') {
+    super(message, HTTP_STATUS.NOT_IMPLEMENTED, ERROR_CODES.NOT_IMPLEMENTED, false);
+  }
+}
