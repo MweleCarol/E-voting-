@@ -97,7 +97,7 @@ model VoterRegistration {
   id           String    @id @default(uuid())
   studentId    String    @map("student_id")
   electionId   String    @map("election_id")
-  verified     Boolean   @default(false)
+  status       RegistrationStatus @default(PENDING)
   verifiedBy   String?   @map("verified_by")
   verifiedAt   DateTime? @map("verified_at")
   participated Boolean   @default(false)
@@ -301,6 +301,12 @@ enum CandidateStatus {
   APPROVED
   REJECTED
   WITHDRAWN
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum ApprovalActionType {

@@ -174,3 +174,17 @@ export async function findUserDetailById(userId: string) {
     select: userSummarySelect,
   });
 }
+
+
+// ---------------------------------------------------------------------
+// Cross-module lookup — used by verification.service.ts (M9) to resolve
+// an authenticated User.id into the Student.id it needs for registration.
+// Minimal select, same pattern as elections' findElectionForTransition.
+// ---------------------------------------------------------------------
+
+export async function findStudentByUserId(userId: string) {
+  return prisma.student.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+}

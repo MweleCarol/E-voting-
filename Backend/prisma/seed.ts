@@ -46,7 +46,7 @@ async function seedAdminUser(adminRoleId: string): Promise<void> {
     where: { email: 'carolyne@devs.com' },
     update: {},
     create: {
-      email: 'carolyne@devs.com',
+      email: 'carolyne@devs.com', 
       fullName: 'Carolyne Admin',
       passwordHash,
       status: UserStatus.ACTIVE,

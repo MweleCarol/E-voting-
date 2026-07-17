@@ -26,16 +26,18 @@ approvalsRouter.use(authenticate);
 // M7's GET /:id, there's no per-row visibility nuance to defer to the service
 // here — a student has no legitimate reason to see any approval request, so
 // the gate belongs at the router for both list and detail, not just list.
+
+
 approvalsRouter.get(
   '/',
-  requireRole('SYSTEM_ADMIN', 'ELECTION_OFFICER', 'AUDITOR'),
+  requireRole('SYSTEM_ADMIN', 'ELECTION_OFFICER', 'AUDITOR', 'OBSERVER'),
   validate({ query: listApprovalRequestsQuerySchema }),
   asyncHandler(listApprovalRequestsHandler),
 );
 
 approvalsRouter.get(
   '/:requestId',
-  requireRole('SYSTEM_ADMIN', 'ELECTION_OFFICER', 'AUDITOR'),
+  requireRole('SYSTEM_ADMIN', 'ELECTION_OFFICER', 'AUDITOR', 'OBSERVER'),
   validate({ params: requestIdParamSchema }),
   asyncHandler(getApprovalRequestHandler),
 );

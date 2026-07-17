@@ -13,6 +13,7 @@ import {
   type ResolvedApprovalContext,
   type ApprovalRequestWithTally,
   type ListApprovalRequestsQuery,
+  type ActionDispatchResult,
 } from './approvals.types.js';
 import {
   findRequestForVoting,
@@ -22,6 +23,7 @@ import {
   findRequestWithTally,
   listApprovalRequests as dbListApprovalRequests,
 } from './approvals.repository.js';
+import {resolveCandidacy} from '../candidates/candidates.service.js';
 
 import { Prisma } from '@generated/prisma/client';
 import { prisma } from '@database/client.js';
@@ -33,7 +35,13 @@ import { prisma } from '@database/client.js';
 const ACTION_RESOLVERS: ActionResolverMap = {
   ELECTION_ACTIVATE: (ctx, tx) => dispatchToElections(ctx, tx),
   ELECTION_CLOSE: (ctx, tx) => dispatchToElections(ctx, tx),
+  CANDIDATE_APPROVE: (ctx, tx) => dispatchToCandidates(ctx, tx),
 };
+
+async function dispatchToCandidates(ctx: ResolvedApprovalContext, tx: Prisma.TransactionClient) {
+  const { request, finalDecision } = ctx;
+  return resolveCandidacy(request, finalDecision, tx);
+}
 
 async function dispatchToElections(ctx: ResolvedApprovalContext, tx?: Prisma.TransactionClient) {
   const { request, finalDecision } = ctx;
@@ -121,7 +129,7 @@ async function resolveAndDispatch(
   approveCount: number,
   rejectCount: number,
 ): Promise<ApprovalOutcome> {
-  let dispatchResult: ApplyApprovalDecisionResult | null = null;
+  let dispatchResult: ActionDispatchResult | null = null;
 
   await prisma.$transaction(async (tx) => {
     await resolveRequest(requestId, finalDecision, tx);

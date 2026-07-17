@@ -7,6 +7,7 @@ import type {
   Prisma,
 } from '@generated/prisma/client';
 import type { ApplyApprovalDecisionResult } from '../elections/elections.types.js';
+import  type { CandidateApprovalResult } from '../candidates/candidates.types.js';
 
 // ─── QUORUM POLICY ─────────────────────────────────────────────────────────
 // How many independent ELECTION_OFFICER approvals are required to resolve
@@ -65,10 +66,14 @@ export interface ResolvedApprovalContext {
   finalDecision: 'APPROVED' | 'REJECTED';
 }
 
+// New: a named union, so this list grows by one line per future module (M14 adds its own member here later)
+// instead of every reference to the result type needing to be edited individually.
+export type ActionDispatchResult = ApplyApprovalDecisionResult | CandidateApprovalResult;
+
 export type ActionResolver = (
   ctx: ResolvedApprovalContext,
   tx: Prisma.TransactionClient,
-) => Promise<ApplyApprovalDecisionResult>;
+) => Promise<ActionDispatchResult>;
 
 // Deliberately Partial: RESULTS_PUBLISH (M14) and CANDIDATE_APPROVE (M10)
 // have no resolver yet because those modules don't exist. A request of
@@ -89,6 +94,6 @@ export type ApprovalOutcome =
       finalDecision: 'APPROVED' | 'REJECTED';
       approveCount: number;
       rejectCount: number;
-      dispatchResult: ApplyApprovalDecisionResult | null; // null only when veto-rejected — nothing to dispatch on a rejection
+      dispatchResult: ActionDispatchResult | null; // null only when veto-rejected — nothing to dispatch on a rejection
     }
  
