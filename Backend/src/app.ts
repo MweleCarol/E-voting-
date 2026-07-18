@@ -16,6 +16,7 @@ import { verificationRouter } from '@modules/verification/verification.router';
 import { candidatesRouter } from '@modules/candidates/candidates.router';
 import { ballotsRouter } from '@modules/ballots/ballots.router';
 import { votesRouter } from '@modules/voting/votes.router';
+import { auditRouter } from '@modules/audit/audit.router';
 
 const app: Application = express();
 
@@ -64,6 +65,7 @@ app.use('/api/v1/verification', verificationRouter);
 app.use('/api/v1/candidates', candidatesRouter);
 app.use('/api/v1/ballots', ballotsRouter);
 app.use('/api/v1/votes', votesRouter);
+app.use('/api/v1/audit', auditRouter);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 // Throws a NotFoundError which flows into the global error handler below,

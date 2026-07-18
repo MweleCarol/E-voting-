@@ -13,7 +13,15 @@ import {
 } from './votes.repository.js';
 import type { CastVoteInput, CastVoteResult, ReceiptVerificationResult } from './votes.types.js';
 import type { Prisma } from '@generated/prisma/client';
-import { DoubleVotingError, BallotNotFoundError, BallotExpiredError, NotFoundError } from '@shared/errors/errors.js';
+import {
+  DoubleVotingError,
+  BallotNotFoundError,
+  BallotExpiredError,
+  NotFoundError,
+} from '@shared/errors/errors.js';
+
+import * as auditService from '../audit/audit.service.js';
+import { SYSTEM_ANONYMIZED_ACTOR } from '../audit/audit.types.js';
 
 // ─── INTERNAL ABORT SIGNAL ──────────────────────────────────────────────────
 // Thrown, not returned, specifically to force prisma.$transaction's rollback
@@ -64,9 +72,11 @@ export async function castVote(input: CastVoteInput): Promise<CastVoteResult> {
       // to the { valid: true } branch for everything below it
       if (!tokenResult.valid) {
         const domainError =
-          tokenResult.reason === 'NOT_FOUND' ? new BallotNotFoundError() :
-          tokenResult.reason === 'EXPIRED' ? new BallotExpiredError() :
-          new DoubleVotingError('This ballot has already been used to cast a vote');
+          tokenResult.reason === 'NOT_FOUND'
+            ? new BallotNotFoundError()
+            : tokenResult.reason === 'EXPIRED'
+              ? new BallotExpiredError()
+              : new DoubleVotingError('This ballot has already been used to cast a vote');
         throw new CastAbort(domainError);
       }
 
@@ -74,9 +84,11 @@ export async function castVote(input: CastVoteInput): Promise<CastVoteResult> {
       if (!validation.valid) {
         // ← this is the selections failure — a different error entirely,
         // not the token-rejection logic that was here before
-        throw new CastAbort(new NotFoundError(
-          `Position '${validation.positionId}' is not part of this election, or its candidate is not approved: ${validation.reason}`
-        ));
+        throw new CastAbort(
+          new NotFoundError(
+            `Position '${validation.positionId}' is not part of this election, or its candidate is not approved: ${validation.reason}`,
+          ),
+        );
       }
 
       const plaintext = JSON.stringify(input.selections);
@@ -104,6 +116,15 @@ export async function castVote(input: CastVoteInput): Promise<CastVoteResult> {
           createdAt: new Date(receipt.issuedAt),
         },
       });
+
+      await auditService.appendAuditEvent(
+        {
+          actorId: SYSTEM_ANONYMIZED_ACTOR,
+          eventType: 'VOTE_CAST',
+          eventData: { electionId: tokenResult.electionId }, // deliberately nothing else — no selections, no receiptCode, no voteId
+        },
+        tx,
+      );
 
       logger.info('vote.cast', { electionId: tokenResult.electionId }); // now valid — tokenResult is narrowed by this point
 

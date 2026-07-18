@@ -1,11 +1,7 @@
 // src/modules/elections/elections.service.ts
 
 import { logger } from '@config/logger';
-import {
-  NotFoundError,
-  ElectionStateError,
-  ValidationError,
-} from '@shared/errors';
+import { NotFoundError, ElectionStateError, ValidationError } from '@shared/errors';
 import {
   ALLOWED_TRANSITIONS,
   type CreateElectionInput,
@@ -20,20 +16,23 @@ import {
   type ElectionStatus,
 } from './elections.types.js';
 import {
-  createElection       as dbCreateElection,
+  createElection as dbCreateElection,
   findElectionById,
   findElectionForTransition,
-  listElections        as dbListElections,
-  listActiveElections  as dbListActiveElections,
-  updateElection       as dbUpdateElection,
+  listElections as dbListElections,
+  listActiveElections as dbListActiveElections,
+  updateElection as dbUpdateElection,
   updateElectionStatus,
-  addPosition          as dbAddPosition,
-  removePosition       as dbRemovePosition,
+  addPosition as dbAddPosition,
+  removePosition as dbRemovePosition,
   findPositionById,
   createApprovalRequest,
 } from './elections.repository.js';
 
-import {Prisma} from "@generated/prisma/client";
+import { Prisma } from '@generated/prisma/client';
+import { prisma } from '@database/client.js';
+import * as auditService from '../audit/audit.service.js';
+import { QUORUM_DECISION_ACTOR } from '../audit/audit.types.js';
 
 // ─── PRIVATE GUARD ────────────────────────────────────────────────────────────
 
@@ -55,7 +54,7 @@ async function assertTransitionAllowed(
   if (!allowed.includes(election.status)) {
     throw new ElectionStateError(
       `Cannot '${action}' an election with status '${election.status}'. ` +
-      `Allowed from: ${allowed.join(', ')}.`,
+        `Allowed from: ${allowed.join(', ')}.`,
     );
   }
 
@@ -73,8 +72,8 @@ export async function createElection(
   logger.info('election.created', {
     electionId: election.id,
     actorId,
-    title:      election.title,
-    positions:  election.positions.length,
+    title: election.title,
+    positions: election.positions.length,
   });
 
   return election;
@@ -138,7 +137,7 @@ export async function updateElection(
   // Zod only cross-validates when both dates are present in the request body.
   // Here we resolve the effective values against what is already stored.
   const effectiveStart = input.startDate ?? current.startDate;
-  const effectiveEnd   = input.endDate   ?? current.endDate;
+  const effectiveEnd = input.endDate ?? current.endDate;
 
   if (effectiveEnd <= effectiveStart) {
     throw new ValidationError('endDate must be after startDate.');
@@ -149,9 +148,7 @@ export async function updateElection(
   logger.info('election.updated', {
     electionId,
     actorId,
-    fields: Object.keys(input).filter(
-      (k) => input[k as keyof UpdateElectionInput] !== undefined,
-    ),
+    fields: Object.keys(input).filter((k) => input[k as keyof UpdateElectionInput] !== undefined),
   });
 
   return updated;
@@ -159,34 +156,24 @@ export async function updateElection(
 
 // ─── STATE TRANSITIONS ────────────────────────────────────────────────────────
 
-export async function submitElection(
-  electionId: string,
-  actorId: string,
-): Promise<void> {
+export async function submitElection(electionId: string, actorId: string): Promise<void> {
   const election = await assertTransitionAllowed(electionId, 'submit');
 
   // Create the approval request before changing status.
   // If ApprovalRequest creation fails, the election stays DRAFT — no partial state.
-  const request = await createApprovalRequest(
-    electionId,
-    'ELECTION_ACTIVATE',
-    actorId,
-  );
+  const request = await createApprovalRequest(electionId, 'ELECTION_ACTIVATE', actorId);
 
   await updateElectionStatus(electionId, 'PENDING_APPROVAL');
 
   logger.info('election.submitted', {
     electionId,
     actorId,
-    previousStatus:    election.status,
+    previousStatus: election.status,
     approvalRequestId: request.id,
   });
 }
 
-export async function cancelElection(
-  electionId: string,
-  actorId: string,
-): Promise<void> {
+export async function cancelElection(electionId: string, actorId: string): Promise<void> {
   const election = await assertTransitionAllowed(electionId, 'cancel');
 
   await updateElectionStatus(electionId, 'CANCELLED');
@@ -198,19 +185,24 @@ export async function cancelElection(
   });
 }
 
-export async function activateElection(
-  electionId: string,
-  actorId: string,
-): Promise<void> {
+// elections.service.ts — activateElection revised
+
+export async function activateElection(electionId: string, actorId: string): Promise<void> {
   const election = await assertTransitionAllowed(electionId, 'activate');
 
-  await updateElectionStatus(electionId, 'ACTIVE');
-
-  logger.info('election.activated', {
-    electionId,
-    actorId,
-    previousStatus: election.status,
+  await prisma.$transaction(async (tx) => {
+    await updateElectionStatus(electionId, 'ACTIVE', tx);
+    await auditService.appendAuditEvent(
+      {
+        actorId,
+        eventType: 'ELECTION_ACTIVATED',
+        eventData: { electionId, previousStatus: election.status },
+      },
+      tx,
+    );
   });
+
+  logger.info('election.activated', { electionId, actorId, previousStatus: election.status });
 }
 
 export async function initiateClose(
@@ -222,16 +214,12 @@ export async function initiateClose(
 
   // Election stays ACTIVE — close is governance-gated (Design B).
   // Status only changes when M8 approves the ELECTION_CLOSE request.
-  const request = await createApprovalRequest(
-    electionId,
-    'ELECTION_CLOSE',
-    actorId,
-  );
+  const request = await createApprovalRequest(electionId, 'ELECTION_CLOSE', actorId);
 
   logger.info('election.close_requested', {
     electionId,
     actorId,
-    currentStatus:     election.status,
+    currentStatus: election.status,
     approvalRequestId: request.id,
   });
 
@@ -253,8 +241,7 @@ export async function addPosition(
 
   if (election.status !== 'DRAFT') {
     throw new ElectionStateError(
-      `Positions can only be added to DRAFT elections. ` +
-      `Current status: '${election.status}'.`,
+      `Positions can only be added to DRAFT elections. ` + `Current status: '${election.status}'.`,
     );
   }
 
@@ -263,7 +250,7 @@ export async function addPosition(
   logger.info('election.position_added', {
     electionId,
     positionId: position.id,
-    title:      position.title,
+    title: position.title,
     actorId,
   });
 
@@ -284,7 +271,7 @@ export async function removePosition(
   if (election.status !== 'DRAFT') {
     throw new ElectionStateError(
       `Positions can only be removed from DRAFT elections. ` +
-      `Current status: '${election.status}'.`,
+        `Current status: '${election.status}'.`,
     );
   }
 
@@ -328,17 +315,25 @@ export async function applyApprovalDecision(
     }
 
     if (input.approved) {
-      await updateElectionStatus(input.electionId, 'SCHEDULED' , tx);
+      await updateElectionStatus(input.electionId, 'SCHEDULED', tx);
+      await auditService.appendAuditEvent(
+        {
+          actorId: QUORUM_DECISION_ACTOR,
+          eventType: 'ELECTION_SCHEDULED',
+          eventData: { electionId: input.electionId },
+        },
+        tx,
+      );
       logger.info('election.scheduled', {
         electionId: input.electionId,
-        via:        'approval_decision',
+        via: 'approval_decision',
       });
       return { outcome: 'election_scheduled', electionId: input.electionId };
     } else {
-      await updateElectionStatus(input.electionId, 'DRAFT' , tx);
+      await updateElectionStatus(input.electionId, 'DRAFT', tx);
       logger.info('election.reverted_to_draft', {
         electionId: input.electionId,
-        via:        'approval_decision',
+        via: 'approval_decision',
       });
       return { outcome: 'election_reverted_to_draft', electionId: input.electionId };
     }
@@ -351,16 +346,24 @@ export async function applyApprovalDecision(
     }
 
     if (input.approved) {
-      await updateElectionStatus(input.electionId, 'CLOSED' , tx);
+      await updateElectionStatus(input.electionId, 'CLOSED', tx);
+      await auditService.appendAuditEvent(
+        {
+          actorId: QUORUM_DECISION_ACTOR,
+          eventType: 'ELECTION_CLOSED',
+          eventData: { electionId: input.electionId },
+        },
+        tx,
+      );
       logger.info('election.closed', {
         electionId: input.electionId,
-        via:        'approval_decision',
+        via: 'approval_decision',
       });
       return { outcome: 'election_closed', electionId: input.electionId };
     } else {
       // Rejected — election continues running. No status change.
       logger.info('election.close_rejected', {
-        electionId:    input.electionId,
+        electionId: input.electionId,
         currentStatus: election.status,
       });
       return { outcome: 'election_close_rejected', electionId: input.electionId };

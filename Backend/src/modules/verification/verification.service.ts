@@ -19,6 +19,9 @@ import {
   findRegistrationByStudentAndElection,
   listRegistrations as dbListRegistrations,
 } from './verification.repository.js';
+import { prisma } from '@database/client.js';
+import * as auditService from '../audit/audit.service.js';
+
 
 // ─── REGISTER ───────────────────────────────────────────────────────────────
 export async function registerForElection(userId: string, electionId: string) {
@@ -68,15 +71,22 @@ async function resolve(input: ResolveRegistrationInput, targetStatus: 'APPROVED'
     throw new AuthorizationError('You cannot verify your own voter registration');
   }
 
-  const updated = await resolveRegistration(input.registrationId, targetStatus, input.officerId);
-
-  logger.info('verification.resolved', {
-    registrationId: input.registrationId,
-    officerId: input.officerId,
-    status: targetStatus,
+    const updated = await prisma.$transaction(async (tx) => {
+    const result = await resolveRegistration(input.registrationId, targetStatus, input.officerId, tx);
+    await auditService.appendAuditEvent(
+      {
+        actorId: input.officerId, // real, single actor — no quorum involved here
+        eventType: targetStatus === 'APPROVED' ? 'REGISTRATION_APPROVED' : 'REGISTRATION_REJECTED',
+        eventData: { registrationId: input.registrationId },
+      },
+      tx,
+    );
+    return result;
   });
 
+  logger.info('verification.resolved', { registrationId: input.registrationId, officerId: input.officerId, status: targetStatus });
   return updated;
+
 }
 
 export const approveRegistration = (input: ResolveRegistrationInput) => resolve(input, 'APPROVED');

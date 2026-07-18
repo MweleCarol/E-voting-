@@ -3,7 +3,7 @@
 import { logger } from '@config/logger';
 import { NotFoundError, ElectionStateError, NotImplementedError } from '@shared/errors';
 import { findStudentByUserId } from '../users/users.repository.js';
-import { findPositionById,findElectionForTransition } from '../elections/elections.repository.js';
+import { findPositionById, findElectionForTransition } from '../elections/elections.repository.js';
 import { isEligible } from '../verification/verification.service.js';
 import { REGISTRATION_ALLOWED_ELECTION_STATUSES } from '../verification/verification.types.js';
 import type { Prisma } from '@generated/prisma/client';
@@ -22,9 +22,15 @@ import {
   listCandidates as dbListCandidates,
   findCandidateById,
 } from './candidates.repository.js';
+import * as auditService from '../audit/audit.service.js';
+import { QUORUM_DECISION_ACTOR } from '../audit/audit.types.js';
+
 
 // ─── SUBMIT CANDIDACY ────────────────────────────────────────────────────────
-export async function submitCandidacy(userId: string, input: Omit<CreateCandidacyInput, 'studentId'>) {
+export async function submitCandidacy(
+  userId: string,
+  input: Omit<CreateCandidacyInput, 'studentId'>,
+) {
   const student = await findStudentByUserId(userId);
   if (!student) {
     throw new NotFoundError('No student profile linked to this account');
@@ -44,7 +50,7 @@ export async function submitCandidacy(userId: string, input: Omit<CreateCandidac
   }
   if (!REGISTRATION_ALLOWED_ELECTION_STATUSES.includes(election.status)) {
     throw new ElectionStateError(
-      `Cannot submit a candidacy for an election with status '${election.status}'.`
+      `Cannot submit a candidacy for an election with status '${election.status}'.`,
     );
   }
 
@@ -53,7 +59,7 @@ export async function submitCandidacy(userId: string, input: Omit<CreateCandidac
   const eligibility = await isEligible(student.id, position.electionId);
   if (!eligibility.eligible) {
     throw new ElectionStateError(
-      `You must be an approved voter for this election before running for a position (${eligibility.reason}).`
+      `You must be an approved voter for this election before running for a position (${eligibility.reason}).`,
     );
   }
 
@@ -65,13 +71,20 @@ export async function submitCandidacy(userId: string, input: Omit<CreateCandidac
     requestedBy: userId,
   });
 
-  logger.info('candidacy.submitted', { candidateId: candidate.id, studentId: student.id, approvalRequestId });
+  logger.info('candidacy.submitted', {
+    candidateId: candidate.id,
+    studentId: student.id,
+    approvalRequestId,
+  });
 
   return candidate;
 }
 
 // ─── WITHDRAW ───────────────────────────────────────────────────────────────
-export async function withdrawCandidacy(userId: string, input: Omit<WithdrawCandidacyInput, 'studentId'>) {
+export async function withdrawCandidacy(
+  userId: string,
+  input: Omit<WithdrawCandidacyInput, 'studentId'>,
+) {
   const student = await findStudentByUserId(userId);
   if (!student) {
     throw new NotFoundError('No student profile linked to this account');
@@ -110,7 +123,7 @@ export async function resolveCandidacy(
   // but has no DB-level shape guarantee — see prior turn's Option B tradeoff.
   if (!payload || typeof payload.candidateId !== 'string') {
     throw new NotImplementedError(
-      `ApprovalRequest '${request.id}' (CANDIDATE_APPROVE) has a malformed payload — missing candidateId.`
+      `ApprovalRequest '${request.id}' (CANDIDATE_APPROVE) has a malformed payload — missing candidateId.`,
     );
   }
 
@@ -125,11 +138,19 @@ export async function resolveCandidacy(
   const newStatus = finalDecision === 'APPROVED' ? 'APPROVED' : 'REJECTED';
   await updateCandidateStatus(candidate.id, newStatus, tx);
 
+  await auditService.appendAuditEvent(
+    {
+      actorId: QUORUM_DECISION_ACTOR,
+      eventType: finalDecision === 'APPROVED' ? 'CANDIDATE_APPROVED' : 'CANDIDATE_REJECTED',
+      eventData: { candidateId: candidate.id, positionId: candidate.positionId },
+    },
+    tx,
+  );
+
   return finalDecision === 'APPROVED'
     ? { outcome: 'candidate_approved', candidateId: candidate.id }
     : { outcome: 'candidate_rejected', candidateId: candidate.id };
 }
-
 
 export async function getCandidateById(candidateId: string) {
   const candidate = await findCandidateById(candidateId);

@@ -3,18 +3,12 @@
 import { prisma } from '@database/client.js';
 import { Prisma, RegistrationStatus } from '@generated/prisma/client';
 import { ConflictError } from '@shared/errors';
-import type {
-  RegisterForElectionInput,
-  ListRegistrationsQuery,
-} from './verification.types.js';
+import type { RegisterForElectionInput, ListRegistrationsQuery } from './verification.types.js';
 
 // ─── ELIGIBILITY — the method M11 will call via the service's isEligible() ──
 // Single query, minimal select. All three facts isEligible() needs
 // (exists, status, participated) come back together, no separate reads.
-export async function findRegistrationForEligibility(
-  studentId: string,
-  electionId: string
-) {
+export async function findRegistrationForEligibility(studentId: string, electionId: string) {
   return prisma.voterRegistration.findUnique({
     where: { studentId_electionId: { studentId, electionId } },
     select: { id: true, status: true, participated: true },
@@ -61,23 +55,18 @@ export async function findRegistrationForResolution(registrationId: string) {
 export async function resolveRegistration(
   registrationId: string,
   status: RegistrationStatus,
-  officerId: string
+  officerId: string,
+  tx?: Prisma.TransactionClient,
 ) {
-  return prisma.voterRegistration.update({
+  const client = tx ?? prisma;
+  return client.voterRegistration.update({
     where: { id: registrationId },
-    data: {
-      status,
-      verifiedBy: officerId,
-      verifiedAt: new Date(),
-    },
+    data: { status, verifiedBy: officerId, verifiedAt: new Date() },
   });
 }
 
 // ─── STATUS QUERY (student checking their own registration) ───────────────
-export async function findRegistrationByStudentAndElection(
-  studentId: string,
-  electionId: string
-) {
+export async function findRegistrationByStudentAndElection(studentId: string, electionId: string) {
   return prisma.voterRegistration.findUnique({
     where: { studentId_electionId: { studentId, electionId } },
   });
