@@ -226,3 +226,36 @@ export class NotImplementedError extends AppError {
     super(message, HTTP_STATUS.NOT_IMPLEMENTED, ERROR_CODES.NOT_IMPLEMENTED, false);
   }
 }
+
+
+/**
+ * Thrown when a ballot token doesn't correspond to any issued Ballot.
+ * Distinct from a generic NotFoundError because the frontend needs to
+ * react differently — "request a ballot" is a different call to action
+ * than a generic 404.
+ */
+export class BallotNotFoundError extends AppError {
+  constructor(message: string = 'Ballot token not found') {
+    super(message, HTTP_STATUS.NOT_FOUND, ERROR_CODES.BALLOT_NOT_FOUND);
+  }
+}
+
+
+/**
+ * Thrown when a ballot token existed and was valid, but its session
+ * window has passed. 410 Gone, not 404 — the resource is confirmed to
+ * have once existed and be legitimately gone, which is a meaningfully
+ * different signal from "never existed" to a client deciding whether
+ * to prompt a retry (410) versus treat the request as malformed (404).
+ */
+export class BallotExpiredError extends AppError {
+  constructor(message: string = 'This ballot has expired') {
+    super(message, HTTP_STATUS.GONE, ERROR_CODES.BALLOT_EXPIRED);
+  }
+}
+
+export class CandidateNotApprovedError extends AppError {
+  constructor(message: string = 'Candidate is not approved for this position') {
+    super(message, HTTP_STATUS.UNPROCESSABLE_ENTITY, ERROR_CODES.CANDIDATE_NOT_APPROVED);
+  }
+}

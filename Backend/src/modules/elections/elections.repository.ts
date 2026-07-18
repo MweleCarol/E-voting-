@@ -125,6 +125,16 @@ export async function findElectionForTransition(
   });
 }
 
+
+// elections.repository.ts — addition
+
+export async function findElectionForBallotWindow(id: string) {
+  return prisma.election.findUnique({
+    where: { id },
+    select: { id: true, status: true, startDate: true, endDate: true },
+  });
+}
+
 export async function listElections(
   input: ListElectionsInput,
 ): Promise<PaginatedElectionsResponse> {

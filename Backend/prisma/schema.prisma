@@ -102,6 +102,7 @@ model VoterRegistration {
   verifiedAt   DateTime? @map("verified_at")
   participated Boolean   @default(false)
   createdAt    DateTime  @default(now()) @map("created_at")
+  activeBallotToken String? @unique @map("active_ballot_token")
 
   student    Student   @relation(fields: [studentId], references: [id])
   election   Election  @relation(fields: [electionId], references: [id])
@@ -179,7 +180,7 @@ model Ballot {
 // No student reference here — ever. ballotToken is the only link, and it is one-way.
 model Vote {
   id               String   @id @default(uuid())
-  ballotToken      String   @map("ballot_token")
+  ballotToken      String   @unique @map("ballot_token")
   encryptedVote    String   @map("encrypted_vote")
   iv               String
   authTag          String   @map("auth_tag")
@@ -197,6 +198,7 @@ model VoteReceipt {
   id          String   @id @default(uuid())
   voteId      String   @unique @map("vote_id")
   receiptCode String   @unique @map("receipt_code")
+  salt        String
   createdAt   DateTime @default(now()) @map("created_at")
 
   vote Vote @relation(fields: [voteId], references: [id])

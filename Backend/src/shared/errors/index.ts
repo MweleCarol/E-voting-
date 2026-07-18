@@ -14,4 +14,6 @@ export {
   CryptographicError,
   ForbiddenError,
   NotImplementedError,
+  BallotNotFoundError,
+  BallotExpiredError,
 } from './errors';

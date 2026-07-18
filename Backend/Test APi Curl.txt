@@ -1,168 +1,43 @@
- 
+C:\Users\user\OneDrive\Desktop\React-Projects\E-Voting\Backend>npm run db:migrate
 
- logged in and gained the access token 
+> backend@1.0.0 db:migrate
+> prisma migrate dev
 
+Loaded Prisma config from prisma.config.ts.
 
- test 1 created the election successfully
-
- test 2 list the elections
-
- {
-    "success": true,
-    "message": "Elections retrieved successfully.",
-    "data": {
-        "elections": [
-            {
-                "id": "4ce2a54f-a09b-4968-9ebc-b1fa8fe12059",
-                "title": "Student Guild Elections 2026",
-                "description": "Annual student leadership elections",
-                "status": "DRAFT",
-                "startDate": "2026-09-01T08:00:00.000Z",
-                "endDate": "2026-09-02T17:00:00.000Z",
-                "positionCount": 3,
-                "createdBy": "b1e279dc-2be3-484c-bf08-68ced9d09cef",
-                "createdAt": "2026-07-05T05:26:02.161Z",
-                "updatedAt": "2026-07-05T05:26:02.161Z"
-            }
-        ],
-        "total": 1,
-        "page": 1,
-        "limit": 20
-    }
-}
+Prisma schema loaded from prisma\schema.prisma.
+Datasource "db": PostgreSQL database "Evoting", schema "public" at "localhost:5432"
 
 
-test 3
+⚠️  Warnings for the current datasource:
 
-{
-    "success": true,
-    "message": "Election retrieved successfully.",
-    "data": {
-        "id": "4ce2a54f-a09b-4968-9ebc-b1fa8fe12059",
-        "title": "Student Guild Elections 2026",
-        "description": "Annual student leadership elections",
-        "status": "DRAFT",
-        "startDate": "2026-09-01T08:00:00.000Z",
-        "endDate": "2026-09-02T17:00:00.000Z",
-        "createdBy": "b1e279dc-2be3-484c-bf08-68ced9d09cef",
-        "createdAt": "2026-07-05T05:26:02.161Z",
-        "updatedAt": "2026-07-05T05:26:02.161Z",
-        "positions": [
-            {
-                "id": "bb0da0ea-1c07-489a-9390-fc2e17d654a2",
-                "title": "President"
-            },
-            {
-                "id": "2595a46b-c105-4115-9c31-052d8e2c5198",
-                "title": "Vice President"
-            },
-            {
-                "id": "b94b6b8d-441b-4662-9e14-7a62c2d940f6",
-                "title": "Secretary"
-            }
-        ]
-    }
-}
+  • A unique constraint covering the columns `[ballot_token]` on the table `votes` will be added. If there are existing duplicate values, this will fail.
 
-test 4
+√ Are you sure you want to create and apply this migration? ... yes
+√ Enter a name for the new migration: ... vote_uniqueness_and_receipt_salt
+Applying migration `20260717224752_vote_uniqueness_and_receipt_salt`
 
-{
-    "success": true,
-    "message": "Election updated successfully.",
-    "data": {
-        "id": "4ce2a54f-a09b-4968-9ebc-b1fa8fe12059",
-        "title": "Student Guild Elections 2026 - Updated",
-        "description": "Annual student leadership elections",
-        "status": "DRAFT",
-        "startDate": "2026-09-01T08:00:00.000Z",
-        "endDate": "2026-09-02T17:00:00.000Z",
-        "createdBy": "b1e279dc-2be3-484c-bf08-68ced9d09cef",
-        "createdAt": "2026-07-05T05:26:02.161Z",
-        "updatedAt": "2026-07-05T05:29:45.812Z",
-        "positions": [
-            {
-                "id": "bb0da0ea-1c07-489a-9390-fc2e17d654a2",
-                "title": "President"
-            },
-            {
-                "id": "2595a46b-c105-4115-9c31-052d8e2c5198",
-                "title": "Vice President"
-            },
-            {
-                "id": "b94b6b8d-441b-4662-9e14-7a62c2d940f6",
-                "title": "Secretary"
-            }
-        ]
-    }
-}
+The following migration(s) have been created and applied from new schema changes:
 
-test 5
-{
-    "success": true,
-    "message": "Position added.",
-    "data": {
-        "id": "0a302cf3-18c2-41cf-bfb8-cb1e3c967f88",
-        "title": "Treasurer"
-    }
-}
+prisma\migrations/
+  └─ 20260717224752_vote_uniqueness_and_receipt_salt/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
 
 
-test 6
+C:\Users\user\OneDrive\Desktop\React-Projects\E-Voting\Backend>npm run db:generate
 
-{
-    "success": true,
-    "message": "Election submitted for approval.",
-    "data": {
-        "electionId": "4ce2a54f-a09b-4968-9ebc-b1fa8fe12059"
-    }
-}
+> backend@1.0.0 db:generate
+> prisma generate
 
-test 7
+Loaded Prisma config from prisma.config.ts.
 
-{
-    "success": false,
-    "message": "Cannot 'submit' an election with status 'PENDING_APPROVAL'. Allowed from: DRAFT.",
-    "errorCode": "INVALID_ELECTION_STATE",
-    "statusCode": 422,
-    "stack": "Error: Cannot 'submit' an election with status 'PENDING_APPROVAL'. Allowed from: DRAFT.\n    at assertTransitionAllowed (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\src\\modules\\elections\\elections.service.ts:54:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async submitElection (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\src\\modules\\elections\\elections.service.ts:164:20)\n    at async submitElectionHandler (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\src\\modules\\elections\\elections.controller.ts:124:3)"
-}
+Prisma schema loaded from prisma\schema.prisma.
+
+✔ Generated Prisma Client (7.8.0) to .\src\generated\prisma in 390ms
 
 
-test 8
+C:\Users\user\OneDrive\Desktop\React-Projects\E-Voting\Backend>npx tsc --noEmit
 
-{
-    "success": true,
-    "message": "Active elections retrieved successfully.",
-    "data": {
-        "elections": [],
-        "total": 0,
-        "page": 1,
-        "limit": 20
-    }
-}
-
-
-test 9
-
-{
-    "success": false,
-    "message": "Validation failed",
-    "errorCode": "VALIDATION_ERROR",
-    "statusCode": 400,
-    "errors": {
-        "params.id": [
-            "Election ID must be a valid UUID"
-        ]
-    },
-    "stack": "Error: Validation failed\n    at <anonymous> (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\src\\middleware\\validate.middleware.ts:99:13)\n    at Layer.handleRequest (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\lib\\route.js:157:13)\n    at Route.dispatch (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\lib\\route.js:117:3)\n    at handle (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:435:11)\n    at Layer.handleRequest (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:295:15\n    at param (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:600:14)\n    at param (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:610:14)\n    at processParams (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:664:3)"
-}
-
-test 10
-
-{
-    "success": false,
-    "message": "Authentication required.",
-    "errorCode": "AUTHENTICATION_FAILED",
-    "statusCode": 401,
-    "stack": "Error: Authentication required.\n    at authenticate (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\src\\middleware\\authenticate.middleware.ts:10:11)\n    at Layer.handleRequest (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at trimPrefix (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:342:13)\n    at C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:297:9\n    at processParams (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:582:12)\n    at next (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:291:5)\n    at router.handle (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:186:3)\n    at router (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:60:12)\n    at Layer.handleRequest (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\lib\\layer.js:152:17)\n    at trimPrefix (C:\\Users\\user\\OneDrive\\Desktop\\React-Projects\\E-Voting\\Backend\\node_modules\\router\\index.js:342:13)"
-}
+C:\Users\user\OneDrive\Desktop\React-Projects\E-Voting\Backend>
